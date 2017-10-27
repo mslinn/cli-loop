@@ -87,12 +87,7 @@ object CliLoop extends ComplexStringCompleter
         terminal.puts(Capability.clear_screen)
         terminal.flush()
 
-      case "custom" =>
-        terminal.writer.println(
-          s"""parsedLine: word = ${ parsedLine.word }, wordIndex = ${ parsedLine.wordIndex }, wordCursor = ${ parsedLine.wordCursor }, cursor = ${ parsedLine.cursor }
-             |words = ${ parsedLine.words.asScala.mkString(", ") }
-             |line = ${ parsedLine.line }
-             |""".stripMargin)
+      case "custom" => custom(parsedLine)
 
       case "help" | "?" =>
         println
@@ -113,6 +108,14 @@ object CliLoop extends ComplexStringCompleter
         help()
     }
   }
+
+  protected def custom(pl: ParsedLine): Unit =
+    terminal.writer.println(
+      s"""parsedLine: word = ${ pl.word }, wordIndex = ${ pl.wordIndex }, wordCursor = ${ pl.wordCursor }, cursor = ${ pl.cursor }
+         |words = ${ pl.words.asScala.mkString(", ") }
+         |line = ${ pl.line }
+         |""".stripMargin
+    )
 
   protected def bindKey(parsedLine: ParsedLine): Unit = {
     if (parsedLine.words.size == 1) {
