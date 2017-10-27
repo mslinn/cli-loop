@@ -36,9 +36,9 @@ import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 
-public class Hello {
+public class JavaCliLoop {
     private static void usage() {
-        System.out.println("Usage: java " + Hello.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
+        System.out.println("Usage: java " + JavaCliLoop.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
         System.out.println("  none    - no completors");
         System.out.println("  simple  - a simple completor that compiles \"foo\", \"bar\", and \"baz\"");
         System.out.println("  files   - a completor that compiles " + "file names");
@@ -208,7 +208,7 @@ public class Hello {
                 Executors.newScheduledThreadPool(1)
                         .scheduleAtFixedRate(() -> {
                             reader.callWidget(LineReader.CLEAR);
-                            reader.getTerminal().writer().println("Hello world!");
+                            reader.getTerminal().writer().println("JavaCliLoop world!");
                             reader.callWidget(LineReader.REDRAW_LINE);
                             reader.callWidget(LineReader.REDISPLAY);
                             reader.getTerminal().writer().flush();

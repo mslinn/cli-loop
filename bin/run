@@ -4,7 +4,7 @@
 # bin/run -j [entryPoint]
 #
 # -j option forces rebuild of jar
-# entryPoint defaults to "Hello"
+# entryPoint defaults to "Main"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
 cd "$DIR"
@@ -41,7 +41,7 @@ fi
 if [ "$1" ]; then
   ENTRY="$1"
 else
-  ENTRY=Hello
+  ENTRY=Main
 fi
 
 java -cp "$JAR" "$ENTRY" "$@"
