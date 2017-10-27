@@ -1,11 +1,11 @@
 import java.util.{Map => JMap}
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.{DefaultParser, LineReaderImpl}
-import org.jline.reader.{Binding, Candidate, EndOfFileException, LineReader, LineReaderBuilder, Macro, ParsedLine, Reference, UserInterruptException}
+import org.jline.reader.{Binding, EndOfFileException, LineReader, LineReaderBuilder, Macro, ParsedLine, Reference, UserInterruptException}
 import org.jline.terminal.{Terminal, TerminalBuilder}
-import org.jline.utils.AttributedString
 import org.jline.utils.InfoCmp.Capability
-import collection.JavaConverters._
+import org.jline.utils.{AttributedString, AttributedStringBuilder, AttributedStyle}
+import scala.collection.JavaConverters._
 
 object CliLoop extends ComplexStringCompleter
   with CustomCompleter
@@ -65,19 +65,82 @@ object CliLoop extends ComplexStringCompleter
     }
   }
 
-  def help(full: Boolean = false): Unit = {
-    println("Commands are: bindkey, cls, custom, help/?, set, testkey and tput")
-    if (full)
-      println(s"""
-                |bindkey - shows all key bindings
-                |cls     - clears the screen
-                |custom  - demonstrates a TreeCompleter
-                |help    - displays this message
-                |set     - set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'
-                |testkey - tests a key binding
-                |tput    - demonstrates a terminal capability, such as 'bell'
-                |""".stripMargin)
+  protected val commands = List("bondkey", "cls", "custom", ("help", "?"), "set", "testkey", "tput")
+  protected def help(full: Boolean = false): Unit = {
+    implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("Commands are: ")
+    commands.zipWithIndex.foreach { case (x, i) =>
+      x match {
+        case name: String if i==commands.length-1 => bold(name, isLast=true)
+        case name: String if i==commands.length-2 => bold(name, isPenultimate=true)
+        case name: String => bold(name)
+        case (name: String, alias: String) => bold(name, alias)
+      }
+    }
+    terminal.writer.println(asb.toAnsi)
+
+    if (full) {
+      implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("\n")
+      helpCmd("bindkey", "shows all key bindings")
+      helpCmd("cls",     "clears the screen")
+      helpCmd("custom",  "demonstrates a TreeCompleter")
+      helpCmd("help", "?", "displays this message")
+      helpCmd("set",     s"set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'")
+      helpCmd("testkey", "tests a key binding")
+      helpCmd("tput",    "demonstrates a terminal capability, such as 'bell'")
+      terminal.writer.println(asb.toAnsi)
+    }
   }
+
+  protected def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)
+                       (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder = {
+    attributedStringBuilder
+      .style(AttributedStyle.DEFAULT.bold)
+      .append(name)
+      .style(AttributedStyle.DEFAULT)
+
+    if (isPenultimate)
+      attributedStringBuilder.append(" and ")
+    else if (!isLast)
+      attributedStringBuilder.append(", ")
+
+    attributedStringBuilder
+  }
+
+  protected def bold(name: String, alias: String)
+                       (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
+    attributedStringBuilder
+      .style(AttributedStyle.DEFAULT.bold)
+      .append(name)
+      .style(AttributedStyle.DEFAULT)
+      .append("/")
+      .style(AttributedStyle.DEFAULT.bold)
+      .append(alias)
+      .style(AttributedStyle.DEFAULT)
+      .append(", ")
+
+  protected def helpCmd(name: String, message: String)
+                       (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
+    attributedStringBuilder
+      .style(AttributedStyle.DEFAULT.bold)
+      .append(name)
+      .style(AttributedStyle.DEFAULT)
+      .append(" - ")
+      .append(message)
+      .append("\n")
+
+  protected def helpCmd(name: String, alias: String, message: String)
+                       (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
+    attributedStringBuilder
+      .style(AttributedStyle.DEFAULT.bold)
+      .append(name)
+      .style(AttributedStyle.DEFAULT)
+      .append("/")
+      .style(AttributedStyle.DEFAULT.bold)
+      .append(alias)
+      .style(AttributedStyle.DEFAULT)
+      .append(" - ")
+      .append(message)
+      .append("\n")
 
   protected def processLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
