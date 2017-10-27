@@ -39,27 +39,17 @@ import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 
-public class Hello
-{
-    public static void usage() {
-        System.out.println("Usage: java " + Example.class.getName()
-            + " [none/simple/files/dictionary [trigger mask]]");
+public class Hello {
+    private static void usage() {
+        System.out.println("Usage: java " + Hello.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
         System.out.println("  none - no completors");
-        System.out.println("  simple - a simple completor that comples "
-            + "\"foo\", \"bar\", and \"baz\"");
-        System.out
-            .println("  files - a completor that comples " + "file names");
-        System.out.println("  classes - a completor that comples "
-            + "java class names");
-        System.out
-            .println("  trigger - a special word which causes it to assume "
-                + "the next line is a password");
-        System.out.println("  mask - is the character to print in place of "
-            + "the actual password character");
+        System.out.println("  simple - a simple completor that compiles \"foo\", \"bar\", and \"baz\"");
+        System.out.println("  files - a completor that compiles " + "file names");
+        System.out.println("  classes - a completor that compiles java class names");
+        System.out.println("  trigger - a special word which causes it to assume the next line is a password");
+        System.out.println("  mask - is the character to print in place of the actual password character");
         System.out.println("  color - colored prompt and feedback");
-        System.out.println("\n  E.g - java Example simple su '*'\n"
-            + "will use the simple completor with 'su' triggering\n"
-            + "the use of '*' as a password mask.");
+        System.out.println("\n  e.g - java example simple su '*' will use the simple completor with 'su' triggering the use of '*' as a password mask.");
     }
 
     public static void main(String[] args) throws IOException {
@@ -75,7 +65,6 @@ public class Hello
 
             if ((args == null) || (args.length == 0)) {
                 usage();
-
                 return;
             }
 
@@ -105,31 +94,39 @@ public class Hello
                         index++;
                         break;
                     */
+
                     case "timer":
                         timer = true;
                         index++;
                         break;
+
                     case "-system":
                         builder.system(false);
                         index++;
                         break;
+
                     case "+system":
                         builder.system(true);
                         index++;
                         break;
+
                     case "none":
                         break label;
+
                     case "files":
                         completer = new Completers.FileNameCompleter();
                         break label;
+
                     case "simple":
                         completer = new StringsCompleter("foo", "bar", "baz");
                         break label;
+
                     case "quotes":
                         DefaultParser p = new DefaultParser();
                         p.setEofOnUnclosedQuote(true);
                         parser = p;
                         break label;
+
                     case "foo":
                         completer = new ArgumentCompleter(
                                 new StringsCompleter("foo11", "foo12", "foo13"),
@@ -141,6 +138,7 @@ public class Hello
                                     }
                                 });
                         break label;
+
                     case "param":
                         completer = (reader, line, candidates) -> {
                             if (line.wordIndex() == 0) {
@@ -163,14 +161,16 @@ public class Hello
                             }
                         };
                         break label;
+
                     case "tree":
                         completer = new TreeCompleter(
-                           node("Command1",
-                                   node("Option1",
-                                        node("Param1", "Param2")),
-                                   node("Option2"),
-                                   node("Option3")));
+                                node("Command1",
+                                        node("Option1",
+                                                node("Param1", "Param2")),
+                                        node("Option2"),
+                                        node("Option3")));
                         break label;
+
                     case "regexp":
                         Map<String, Completer> comp = new HashMap<>();
                         comp.put("C1", new StringsCompleter("cmd1"));
@@ -181,6 +181,7 @@ public class Hello
                         comp.put("C22", new StringsCompleter("arg21", "arg22", "arg23"));
                         completer = new Completers.RegexCompleter("C1 C11* C12+ | C2 C21* C22+", comp::get);
                         break label;
+
                     case "color":
                         color = true;
                         prompt = new AttributedStringBuilder()
@@ -198,19 +199,22 @@ public class Hello
                                 .append("\n")
                                 .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.RED | AttributedStyle.BRIGHT))
                                 .append(LocalTime.now().format(new DateTimeFormatterBuilder()
-                                                .appendValue(HOUR_OF_DAY, 2)
-                                                .appendLiteral(':')
-                                                .appendValue(MINUTE_OF_HOUR, 2)
-                                                .toFormatter()))
+                                        .appendValue(HOUR_OF_DAY, 2)
+                                        .appendLiteral(':')
+                                        .appendValue(MINUTE_OF_HOUR, 2)
+                                        .toFormatter()))
                                 .toAnsi();
                         completer = new StringsCompleter("\u001B[1mfoo\u001B[0m", "bar", "\u001B[32mbaz\u001B[0m", "foobar");
                         break label;
+
                     case "mouse":
                         mouse = 1;
                         break label;
+
                     case "mousetrack":
                         mouse = 2;
                         break label;
+
                     default:
                         usage();
                         return;
@@ -218,7 +222,7 @@ public class Hello
             }
 
             if (args.length == index + 2) {
-                mask = args[index+1].charAt(0);
+                mask = args[index + 1].charAt(0);
                 trigger = args[index];
             }
 
@@ -230,7 +234,7 @@ public class Hello
                     .parser(parser)
                     .build();
 
-            if (timer) {
+            if (timer)
                 Executors.newScheduledThreadPool(1)
                         .scheduleAtFixedRate(() -> {
                             reader.callWidget(LineReader.CLEAR);
@@ -239,7 +243,7 @@ public class Hello
                             reader.callWidget(LineReader.REDISPLAY);
                             reader.getTerminal().writer().flush();
                         }, 1, 1, TimeUnit.SECONDS);
-            }
+
             if (mouse != 0) {
                 reader.setOpt(LineReader.Option.MOUSE);
                 if (mouse == 2) {
@@ -272,37 +276,32 @@ public class Hello
                 } catch (EndOfFileException e) {
                     return;
                 }
-                if (line == null) {
+                if (line == null)
                     continue;
-                }
 
                 line = line.trim();
 
                 if (color) {
                     terminal.writer().println(
                             AttributedString.fromAnsi("\u001B[33m======>\u001B[0m\"" + line + "\"")
-                                .toAnsi(terminal));
-
+                                    .toAnsi(terminal));
                 } else {
                     terminal.writer().println("======>\"" + line + "\"");
                 }
                 terminal.flush();
 
-                // If we input the special word then we will mask
-                // the next line.
-                if ((trigger != null) && (line.compareTo(trigger) == 0)) {
+                // If we input the special word then we will mask the next line.
+                if ((trigger != null) && (line.compareTo(trigger) == 0))
                     line = reader.readLine("password> ", mask);
-                }
-                if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
+
+                if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit"))
                     break;
-                }
+
                 ParsedLine pl = reader.getParser().parse(line, 0);
                 if ("set".equals(pl.word())) {
-                    if (pl.words().size() == 3) {
+                    if (pl.words().size() == 3)
                         reader.setVariable(pl.words().get(1), pl.words().get(2));
-                    }
-                }
-                else if ("tput".equals(pl.word())) {
+                } else if ("tput".equals(pl.word())) {
                     if (pl.words().size() == 2) {
                         Capability vcap = Capability.byName(pl.words().get(1));
                         if (vcap != null) {
@@ -311,8 +310,7 @@ public class Hello
                             terminal.writer().println("Unknown capability");
                         }
                     }
-                }
-                else if ("testkey".equals(pl.word())) {
+                } else if ("testkey".equals(pl.word())) {
                     terminal.writer().write("Input the key event(Enter to complete): ");
                     terminal.writer().flush();
                     StringBuilder sb = new StringBuilder();
@@ -323,8 +321,7 @@ public class Hello
                     }
                     terminal.writer().println(KeyMap.display(sb.toString()));
                     terminal.writer().flush();
-                }
-                else if ("bindkey".equals(pl.word())) {
+                } else if ("bindkey".equals(pl.word())) {
                     if (pl.words().size() == 1) {
                         StringBuilder sb = new StringBuilder();
                         Map<String, Binding> bound = reader.getKeys().getBoundKeys();
@@ -361,22 +358,18 @@ public class Hello
                         terminal.flush();
                     } else if (pl.words().size() == 3) {
                         reader.getKeys().bind(
-                                new Reference(pl.words().get(2)), KeyMap.translate(pl.words().get(1))
+                            new Reference(pl.words().get(2)), KeyMap.translate(pl.words().get(1))
                         );
                     }
-                }
-                else if ("cls".equals(pl.word())) {
+                } else if ("cls".equals(pl.word())) {
                     terminal.puts(Capability.clear_screen);
                     terminal.flush();
-                }
-                else if ("sleep".equals(pl.word())) {
+                } else if ("sleep".equals(pl.word())) {
                     Thread.sleep(3000);
                 }
             }
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
         }
     }
-
 }

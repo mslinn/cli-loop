@@ -40,7 +40,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.jline"         % "jline"        % "3.3.0" withSources(),
+  "org.jline"         % "jline"        % "3.5.1" withSources(),
   //
   "org.scalatest"     %% "scalatest"   % "3.0.3" % Test withSources(),
   "junit"             %  "junit"       % "4.12"  % Test
