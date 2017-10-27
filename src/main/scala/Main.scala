@@ -4,7 +4,7 @@ import java.time.{LocalDate, LocalTime}
 import java.util.{HashMap => JHashMap, List => JList}
 import org.jline.builtins.Completers.TreeCompleter.node
 import org.jline.builtins.Completers.{FileNameCompleter, RegexCompleter, TreeCompleter}
-import org.jline.reader.impl.completer.{ArgumentCompleter, StringsCompleter}
+import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter, StringsCompleter}
 import org.jline.reader.{Candidate, Completer, LineReader, ParsedLine}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
@@ -66,6 +66,13 @@ trait MiscCompleters {
     new StringsCompleter("bindkey", "cls", "custom", "help", "set", "sleep", "testkey", "tput")
 }
 
+trait CommandCompleter extends MiscCompleters with SampleTreeCompleter {
+  import org.jline.reader.impl.completer.NullCompleter
+  val aggregateCompleter = new AggregateCompleter(
+    new ArgumentCompleter(NullCompleter.INSTANCE, treeCompleter)
+  )
+}
+
 trait SampleArgumentCompleter {
   val argumentCompleter: ArgumentCompleter = new ArgumentCompleter(
     new StringsCompleter("foo11", "foo12", "foo13"),
@@ -93,14 +100,14 @@ trait SampleTreeCompleter {
     node("cls"),
     node(
       "custom",
-      node("Option1", node("Param1", "Param2")),
-      node("Option2"),
-      node("Option3")
+      node("option1", node("param1", "param2")),
+      node("option2"),
+      node("option3")
     ),
     node("help"),
+    node("password"),
     node("set"),
-    node("sleep"),
     node("testkey"),
-    node("tput")
+    node("tput", node("bell"))
   )
 }

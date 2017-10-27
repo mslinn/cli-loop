@@ -9,10 +9,9 @@ import collection.JavaConverters._
 
 object CliLoop extends ComplexStringCompleter
   with CustomCompleter
-  with MiscCompleters
+  with CommandCompleter
   with SampleArgumentCompleter
-  with SampleRegexCompleter
-  with SampleTreeCompleter {
+  with SampleRegexCompleter {
   protected val useColor = true
 
   protected val terminal: Terminal =
@@ -35,7 +34,7 @@ object CliLoop extends ComplexStringCompleter
   }
 
   def loop(): Unit = {
-    val trigger: Option[String] = None // TODO set this value
+    val trigger: Option[String] = Some("password")
     val mask: Character = null  // LineReader.readLine uses null to control behavior // TODO set this value
     var more = true
 
@@ -45,7 +44,7 @@ object CliLoop extends ComplexStringCompleter
         //line = reader.readLine(prompt, rightPrompt, null.asInstanceOf[MaskingCallback], null) // right prompt is annoying
         line = reader.readLine(prompt)
       } catch {
-        case _: UserInterruptException => // Ignore
+        case _: UserInterruptException => println("Press Control-D to exit")
         case _: EndOfFileException => return
       }
       if (line != null) {
@@ -89,8 +88,6 @@ object CliLoop extends ComplexStringCompleter
       case "set" =>
         if (parsedLine.words.size == 3)
           reader.setVariable(parsedLine.words.get(1), parsedLine.words.get(2))
-
-      case "sleep" => Thread.sleep(3000)
 
       case "testkey" => testKey()
 
@@ -173,15 +170,23 @@ object CliLoop extends ComplexStringCompleter
     terminal.writer.flush()
   }
 
-  protected def tput(parsedLine: ParsedLine): Unit = {
-    if (parsedLine.words.size == 2) {
-      val capability: Capability = Capability.byName(parsedLine.words.get(1))
-      if (capability != null)
+  protected def tput(parsedLine: ParsedLine): Unit = parsedLine.words.size match {
+    case 1 =>
+      terminal.writer.println("No capability specified (try 'bell')")
+
+    case 2 =>
+      Option(Capability.byName(parsedLine.words.get(1))).map { capability =>
         terminal.puts(capability)
-      else
+        terminal.flush()
+        true
+      }.getOrElse {
         terminal.writer.println("Unknown capability")
-    }
-    ()
+        false
+      }
+      ()
+
+    case n =>
+      terminal.writer.println(s"Only one capability may be specified (you specified ${ n - 1 })")
   }
 }
 
