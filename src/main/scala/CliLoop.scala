@@ -98,8 +98,7 @@ object CliLoop extends ComplexStringCompleter
         println
         help()
 
-      case "set" =>
-        set(parsedLine)
+      case "set" => set(parsedLine)
 
       case "testkey" => testKey()
 
