@@ -1,12 +1,9 @@
-/*
- * Copyright (c) 2002-2017, the original author or authors.
+/* Copyright (c) 2002-2017, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
  *
- * http://www.opensource.org/licenses/bsd-license.php
- */
-package org.jline.example;
+ * http://www.opensource.org/licenses/bsd-license.php */
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -42,13 +39,13 @@ import static org.jline.builtins.Completers.TreeCompleter.node;
 public class Hello {
     private static void usage() {
         System.out.println("Usage: java " + Hello.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
-        System.out.println("  none - no completors");
-        System.out.println("  simple - a simple completor that compiles \"foo\", \"bar\", and \"baz\"");
-        System.out.println("  files - a completor that compiles " + "file names");
+        System.out.println("  none    - no completors");
+        System.out.println("  simple  - a simple completor that compiles \"foo\", \"bar\", and \"baz\"");
+        System.out.println("  files   - a completor that compiles " + "file names");
         System.out.println("  classes - a completor that compiles java class names");
         System.out.println("  trigger - a special word which causes it to assume the next line is a password");
-        System.out.println("  mask - is the character to print in place of the actual password character");
-        System.out.println("  color - colored prompt and feedback");
+        System.out.println("  mask    - is the character to print in place of the actual password character");
+        System.out.println("  color   - colored prompt and feedback");
         System.out.println("\n  e.g - java example simple su '*' will use the simple completor with 'su' triggering the use of '*' as a password mask.");
     }
 
