@@ -66,7 +66,7 @@ object CliLoop extends ComplexStringCompleter
   }
 
   // todo how to obtain the following list from the completer?
-  protected val commands = List("bondkey", "cls", "custom", ("help", "?"), "set", "testkey", "tput")
+  protected val commands = List("bindkey", "cls", "custom", ("help", "?"), "password", "set", "testkey", "tput")
 
   protected val cmdMaxWidth: Int = commands.map {
     case string: String => string.length
