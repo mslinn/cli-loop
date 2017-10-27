@@ -15,7 +15,7 @@ trait ComplexStringCompleter {
     .style(AttributedStyle.DEFAULT)
     .append("@bar")
     .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-    .append("\nbaz")
+    .append(" baz")
     .style(AttributedStyle.DEFAULT)
     .append("> ")
     .toAnsi
@@ -36,16 +36,16 @@ trait ComplexStringCompleter {
         )
     ).toAnsi
 
-  val stringsCompleter2: StringsCompleter =
+  val complexStringsCompleter: StringsCompleter =
     new StringsCompleter("\u001B[1mfoo\u001B[0m", "bar", "\u001B[32mbaz\u001B[0m", "foobar")
 }
 
 trait CustomCompleter {
   val customCompleter: Completer = (reader: LineReader, line: ParsedLine, candidates: JList[Candidate]) => {
     if (line.wordIndex == 0) {
-      candidates.add(new Candidate("Command1"))
+      candidates.add(new Candidate("custom"))
       ()
-    } else if (line.words.get(0) == "Command1")
+    } else if (line.words.get(0) == "custom")
       if (line.words.get(line.wordIndex - 1) == "Option1") {
         candidates.add(new Candidate("Param1"))
         candidates.add(new Candidate("Param2"))
@@ -62,7 +62,8 @@ trait CustomCompleter {
 trait MiscCompleters {
   val fileNameCompleter: FileNameCompleter = new FileNameCompleter
 
-  val stringsCompleter1: StringsCompleter = new StringsCompleter("foo", "bar", "baz")
+  val commandStringsCompleter: StringsCompleter =
+    new StringsCompleter("bindkey", "cls", "custom", "help", "set", "sleep", "testkey", "tput")
 }
 
 trait SampleArgumentCompleter {
@@ -88,11 +89,18 @@ trait SampleRegexCompleter {
 
 trait SampleTreeCompleter {
   val treeCompleter: TreeCompleter = new TreeCompleter(
+    node("bindkey"),
+    node("cls"),
     node(
-      "Command1",
+      "custom",
       node("Option1", node("Param1", "Param2")),
       node("Option2"),
       node("Option3")
-    )
+    ),
+    node("help"),
+    node("set"),
+    node("sleep"),
+    node("testkey"),
+    node("tput")
   )
 }

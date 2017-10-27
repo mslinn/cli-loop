@@ -1,18 +1,19 @@
 import java.util.{Map => JMap}
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.{DefaultParser, LineReaderImpl}
-import org.jline.reader.{Binding, EndOfFileException, LineReader, LineReaderBuilder, Macro, MaskingCallback, ParsedLine, Reference, UserInterruptException}
+import org.jline.reader.{Binding, EndOfFileException, LineReader, LineReaderBuilder, Macro, ParsedLine, Reference, UserInterruptException}
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.AttributedString
 import org.jline.utils.InfoCmp.Capability
+import collection.JavaConverters._
 
-class CliLoop extends ComplexStringCompleter
+object CliLoop extends ComplexStringCompleter
   with CustomCompleter
   with MiscCompleters
   with SampleArgumentCompleter
   with SampleRegexCompleter
   with SampleTreeCompleter {
-  protected val color = true
+  protected val useColor = true
 
   protected val terminal: Terminal =
     TerminalBuilder.builder
@@ -28,6 +29,11 @@ class CliLoop extends ComplexStringCompleter
     .parser(parser)
     .build
 
+  def run(): Unit = {
+    help()
+    loop()
+  }
+
   def loop(): Unit = {
     val trigger: Option[String] = None // TODO set this value
     val mask: Character = null  // LineReader.readLine uses null to control behavior // TODO set this value
@@ -36,14 +42,15 @@ class CliLoop extends ComplexStringCompleter
     while (more) {
       var line: String = ""
       try {
-        line = reader.readLine(prompt, rightPrompt, null.asInstanceOf[MaskingCallback], null)
+        //line = reader.readLine(prompt, rightPrompt, null.asInstanceOf[MaskingCallback], null) // right prompt is annoying
+        line = reader.readLine(prompt)
       } catch {
         case _: UserInterruptException => // Ignore
         case _: EndOfFileException => return
       }
       if (line != null) {
         line = line.trim
-        showPrompt(line)
+//        echoInput(line)
 
         // If the trigger word is input then the next input line is masked
         if (trigger.exists(line.compareTo(_) == 0))
@@ -57,24 +64,37 @@ class CliLoop extends ComplexStringCompleter
     }
   }
 
+  def help(): Unit =
+    println("Commands are: bindkey, cls, custom, help, set, sleep, testkey and tput")
+
   protected def processLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
     parsedLine.word match {
-      case "set" =>
-        if (parsedLine.words.size == 3)
-          reader.setVariable(parsedLine.words.get(1), parsedLine.words.get(2))
-
-      case "tput" => tput(parsedLine)
-
-      case "testkey" => testKey()
-
       case "bindkey" => bindKey(parsedLine)
 
       case "cls" =>
         terminal.puts(Capability.clear_screen)
         terminal.flush()
 
+      case "custom" =>
+        terminal.writer.println(
+          s"""parsedLine: word = ${ parsedLine.word }, wordIndex = ${ parsedLine.wordIndex }, wordCursor = ${ parsedLine.wordCursor }, cursor = ${ parsedLine.cursor }
+             |words = ${ parsedLine.words.asScala.mkString(", ") }
+             |line = ${ parsedLine.line }
+             |""".stripMargin)
+
+      case "help" | "?" =>
+        help()
+
+      case "set" =>
+        if (parsedLine.words.size == 3)
+          reader.setVariable(parsedLine.words.get(1), parsedLine.words.get(2))
+
       case "sleep" => Thread.sleep(3000)
+
+      case "testkey" => testKey()
+
+      case "tput" => tput(parsedLine)
 
       case "" => println()
 
@@ -82,8 +102,8 @@ class CliLoop extends ComplexStringCompleter
     }
   }
 
-  protected def bindKey(pl: ParsedLine): Unit = {
-    if (pl.words.size == 1) {
+  protected def bindKey(parsedLine: ParsedLine): Unit = {
+    if (parsedLine.words.size == 1) {
       val sb = new StringBuilder
       val bound: JMap[String, Binding] = reader.getKeys.getBoundKeys
       bound.entrySet.forEach { entry =>
@@ -121,16 +141,16 @@ class CliLoop extends ComplexStringCompleter
       }
       terminal.writer.print(sb.toString)
       terminal.flush()
-    } else if (pl.words.size == 3) {
+    } else if (parsedLine.words.size == 3) {
       reader.getKeys.bind(
-        new Reference(pl.words.get(2)), KeyMap.translate(pl.words.get(1))
+        new Reference(parsedLine.words.get(2)), KeyMap.translate(parsedLine.words.get(1))
       )
     }
   }
 
-  protected def showPrompt(line: String): Unit = {
+  protected def echoInput(line: String): Unit = {
     terminal.writer.println(
-      if (color) {
+      if (useColor) {
         AttributedString.fromAnsi(s"""\u001B[33m======>\u001B[0m"$line"""").toAnsi(terminal)
       } else {
         s"""======>"$line""""
@@ -140,17 +160,17 @@ class CliLoop extends ComplexStringCompleter
   }
 
   protected def testKey(): Unit = {
-    terminal.writer.write("Input the key event(Enter to complete): ")
+    terminal.writer.write("Input the key event (Enter to complete): ")
     terminal.writer.flush()
     val sb = new StringBuilder
     var more = true
-    while (true) {
+    while (more) {
       val c: Int = reader.asInstanceOf[LineReaderImpl].readCharacter
       if (c == 10 || c == 13) more = false
       else sb.append(new String(Character.toChars(c)))
     }
-    terminal.writer().println(KeyMap.display(sb.toString))
-    terminal.writer().flush()
+    terminal.writer.println(KeyMap.display(sb.toString))
+    terminal.writer.flush()
   }
 
   protected def tput(parsedLine: ParsedLine): Unit = {
@@ -166,5 +186,5 @@ class CliLoop extends ComplexStringCompleter
 }
 
 object Main extends App {
-  new CliLoop().loop()
+  CliLoop.run()
 }

@@ -36,9 +36,9 @@ import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static org.jline.builtins.Completers.TreeCompleter.node;
 
 
-public class JavaCliLoop {
+public class JavaMain {
     private static void usage() {
-        System.out.println("Usage: java " + JavaCliLoop.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
+        System.out.println("Usage: java " + JavaMain.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
         System.out.println("  none    - no completors");
         System.out.println("  simple  - a simple completor that compiles \"foo\", \"bar\", and \"baz\"");
         System.out.println("  files   - a completor that compiles " + "file names");
@@ -55,7 +55,7 @@ public class JavaCliLoop {
             String rightPrompt = null;
             Character mask = null;
             String trigger = null;
-            boolean color = false;
+            boolean useColor = false;
             boolean timer = false;
 
             TerminalBuilder builder = TerminalBuilder.builder();
@@ -153,7 +153,7 @@ public class JavaCliLoop {
                         break label;
 
                     case "color":
-                        color = true;
+                        useColor = true;
                         prompt = new AttributedStringBuilder()
                                 .style(AttributedStyle.DEFAULT.background(AttributedStyle.GREEN))
                                 .append("foo")
@@ -208,7 +208,7 @@ public class JavaCliLoop {
                 Executors.newScheduledThreadPool(1)
                         .scheduleAtFixedRate(() -> {
                             reader.callWidget(LineReader.CLEAR);
-                            reader.getTerminal().writer().println("JavaCliLoop world!");
+                            reader.getTerminal().writer().println("JavaMain world!");
                             reader.callWidget(LineReader.REDRAW_LINE);
                             reader.callWidget(LineReader.REDISPLAY);
                             reader.getTerminal().writer().flush();
@@ -251,7 +251,7 @@ public class JavaCliLoop {
 
                 line = line.trim();
 
-                if (color) {
+                if (useColor) {
                     terminal.writer().println(
                             AttributedString.fromAnsi("\u001B[33m======>\u001B[0m\"" + line + "\"")
                                     .toAnsi(terminal));

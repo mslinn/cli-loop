@@ -5,17 +5,17 @@ import org.scalatest.Matchers._
 
 @RunWith(classOf[JUnitRunner])
 class TestyMcTestFace extends WordSpec with MustMatchers {
-  "The 'JavaCliLoop world' string" should {
+  "The 'JavaMain world' string" should {
     "contain 11 characters" in {
-      "JavaCliLoop world".length === 11
+      "JavaMain world".length === 11
     }
 
-    "start with 'JavaCliLoop'" in {
-      "JavaCliLoop world" should startWith("JavaCliLoop")
+    "start with 'JavaMain'" in {
+      "JavaMain world" should startWith("JavaMain")
     }
 
     "end with 'world'" in {
-      "JavaCliLoop world" should endWith("world")
+      "JavaMain world" should endWith("world")
     }
   }
 
