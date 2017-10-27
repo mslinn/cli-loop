@@ -67,6 +67,12 @@ object CliLoop extends ComplexStringCompleter
 
   // todo how to obtain the following list from the completer?
   protected val commands = List("bondkey", "cls", "custom", ("help", "?"), "set", "testkey", "tput")
+
+  protected val cmdMaxWidth: Int = commands.map {
+    case string: String => string.length
+    case (name: String, alias: String) => name.length + alias.length + 1
+  }.max
+
   protected def help(full: Boolean = false): Unit = {
     implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("Commands are: ")
     commands.zipWithIndex.foreach { case (x, i) =>
@@ -123,7 +129,7 @@ object CliLoop extends ComplexStringCompleter
                        (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
     attributedStringBuilder
       .style(AttributedStyle.DEFAULT.bold)
-      .append(name)
+      .append(name + " "*(cmdMaxWidth-name.length))
       .style(AttributedStyle.DEFAULT)
       .append(" - ")
       .append(message)
@@ -139,7 +145,7 @@ object CliLoop extends ComplexStringCompleter
       .style(AttributedStyle.DEFAULT.bold)
       .append(alias)
       .style(AttributedStyle.DEFAULT)
-      .append(" - ")
+      .append(" "*(cmdMaxWidth-name.length - alias.length - 1) + " - ")
       .append(message)
       .append("\n")
 
