@@ -65,6 +65,7 @@ object CliLoop extends ComplexStringCompleter
     }
   }
 
+  // todo how to obtain the following list from the completer?
   protected val commands = List("bondkey", "cls", "custom", ("help", "?"), "set", "testkey", "tput")
   protected def help(full: Boolean = false): Unit = {
     implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("Commands are: ")
