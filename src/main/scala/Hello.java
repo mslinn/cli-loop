@@ -73,25 +73,6 @@ public class Hello {
             label:
             while (args.length > index) {
                 switch (args[index]) {
-                    /* SANDBOX JANSI
-                    case "-posix":
-                        builder.posix(false);
-                        index++;
-                        break;
-                    case "+posix":
-                        builder.posix(true);
-                        index++;
-                        break;
-                    case "-native-pty":
-                        builder.nativePty(false);
-                        index++;
-                        break;
-                    case "+native-pty":
-                        builder.nativePty(true);
-                        index++;
-                        break;
-                    */
-
                     case "timer":
                         timer = true;
                         index++;
