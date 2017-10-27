@@ -121,15 +121,12 @@ public class Hello {
                                     candidates.add(new Candidate("Param1"));
                                     candidates.add(new Candidate("Param2"));
                                 } else {
-                                    if (line.wordIndex() == 1) {
+                                    if (line.wordIndex() == 1)
                                         candidates.add(new Candidate("Option1"));
-                                    }
-                                    if (!line.words().contains("Option2")) {
+                                    if (!line.words().contains("Option2"))
                                         candidates.add(new Candidate("Option2"));
-                                    }
-                                    if (!line.words().contains("Option3")) {
+                                    if (!line.words().contains("Option3"))
                                         candidates.add(new Candidate("Option3"));
-                                    }
                                 }
                             }
                         };
