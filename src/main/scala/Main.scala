@@ -109,6 +109,5 @@ trait SampleTreeCompleter {
     node("testkey"),
     node("tput", node("bell"))
   )
-  val commandNames = node("")
   val treeCompleter: TreeCompleter = new TreeCompleter(nodes: _*)
 }

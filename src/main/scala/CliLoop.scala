@@ -66,15 +66,16 @@ object CliLoop extends ComplexStringCompleter
   }
 
   def help(full: Boolean = false): Unit = {
-    println("Commands are: bindkey, cls, custom, help, set, testkey and tput")
+    println("Commands are: bindkey, cls, custom, help/?, set, testkey and tput")
     if (full)
-      println("""bindkey - shows all key bindings
+      println(s"""
+                |bindkey - shows all key bindings
                 |cls     - clears the screen
                 |custom  - demonstrates a TreeCompleter
                 |help    - displays this message
-                |set     - ???
-                |testkey - ???
-                |tput    - demonstrates a terminal capability
+                |set     - set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'
+                |testkey - tests a key binding
+                |tput    - demonstrates a terminal capability, such as 'bell'
                 |""".stripMargin)
   }
 
@@ -91,7 +92,7 @@ object CliLoop extends ComplexStringCompleter
 
       case "help" | "?" =>
         println
-        help()
+        help(true)
 
       case "set" => set(parsedLine)
 
