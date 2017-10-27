@@ -1,7 +1,7 @@
 import java.util.{Map => JMap}
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.{DefaultParser, LineReaderImpl}
-import org.jline.reader.{Binding, EndOfFileException, LineReader, LineReaderBuilder, Macro, ParsedLine, Reference, UserInterruptException}
+import org.jline.reader.{Binding, Candidate, EndOfFileException, LineReader, LineReaderBuilder, Macro, ParsedLine, Reference, UserInterruptException}
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.AttributedString
 import org.jline.utils.InfoCmp.Capability
@@ -39,17 +39,19 @@ object CliLoop extends ComplexStringCompleter
     var more = true
 
     while (more) {
-      var line: String = ""
+      var line: String =
       try {
-        //line = reader.readLine(prompt, rightPrompt, null.asInstanceOf[MaskingCallback], null) // right prompt is annoying
-        line = reader.readLine(prompt)
+        //reader.readLine(prompt, rightPrompt, null.asInstanceOf[MaskingCallback], null) // right prompt is annoying
+        reader.readLine(prompt)
       } catch {
-        case _: UserInterruptException => println("Press Control-D to exit")
+        case _: UserInterruptException =>
+          println("Press Control-D to exit")
+          ""
+
         case _: EndOfFileException => return
       }
       if (line != null) {
         line = line.trim
-//        echoInput(line)
 
         // If the trigger word is input then the next input line is masked
         if (trigger.exists(line.compareTo(_) == 0))
@@ -63,8 +65,18 @@ object CliLoop extends ComplexStringCompleter
     }
   }
 
-  def help(): Unit =
-    println("Commands are: bindkey, cls, custom, help, set, sleep, testkey and tput")
+  def help(full: Boolean = false): Unit = {
+    println("Commands are: bindkey, cls, custom, help, set, testkey and tput")
+    if (full)
+      println("""bindkey - shows all key bindings
+                |cls     - clears the screen
+                |custom  - demonstrates a TreeCompleter
+                |help    - displays this message
+                |set     - ???
+                |testkey - ???
+                |tput    - demonstrates a terminal capability
+                |""".stripMargin)
+  }
 
   protected def processLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
@@ -83,19 +95,23 @@ object CliLoop extends ComplexStringCompleter
              |""".stripMargin)
 
       case "help" | "?" =>
+        println
         help()
 
       case "set" =>
-        if (parsedLine.words.size == 3)
-          reader.setVariable(parsedLine.words.get(1), parsedLine.words.get(2))
+        set(parsedLine)
 
       case "testkey" => testKey()
 
       case "tput" => tput(parsedLine)
 
-      case "" => println()
+      case "" =>
+        println
+        help()
 
-      case x => println(s"Error: '$x' is an unknown command.")
+      case x =>
+        println(s"Error: '$x' is an unknown command.")
+        help()
     }
   }
 
@@ -154,6 +170,23 @@ object CliLoop extends ComplexStringCompleter
       }
     )
     terminal.flush()
+  }
+
+  protected def set(parsedLine: ParsedLine): Unit = {
+    parsedLine.words.size match {
+      case 1 =>
+        terminal.writer.println("\nError: no variable name or value specified")
+
+      case 2 =>
+        terminal.writer.println("\nError: no new value specified for " + parsedLine.words.get(0))
+
+      case 3 =>
+        reader.setVariable(parsedLine.words.get(0), parsedLine.words.get(1))
+
+      case n =>
+        terminal.writer.println("\nError: Only one new value may be specified " +
+          s"(you specified ${n - 2} values for ${parsedLine.words.get(0)})")
+    }
   }
 
   protected def testKey(): Unit = {

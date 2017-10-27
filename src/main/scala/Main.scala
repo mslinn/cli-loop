@@ -95,8 +95,7 @@ trait SampleRegexCompleter {
 }
 
 trait SampleTreeCompleter {
-  val treeCompleter: TreeCompleter = new TreeCompleter(
-    node("bindkey"),
+  val nodes: List[TreeCompleter.Node] = List(node("bindkey"),
     node("cls"),
     node(
       "custom",
@@ -106,8 +105,10 @@ trait SampleTreeCompleter {
     ),
     node("help"),
     node("password"),
-    node("set"),
+    node("set", node("newValue")),
     node("testkey"),
     node("tput", node("bell"))
   )
+  val commandNames = node("")
+  val treeCompleter: TreeCompleter = new TreeCompleter(nodes: _*)
 }
