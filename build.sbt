@@ -48,7 +48,7 @@ libraryDependencies ++= Seq(
   "junit"             %  "junit"       % "4.12"  % Test
 )
 
-// Nashorn is not found unless tests fork
+// Nashorn is not found unless tests fork, but that means IDEA cannot debug tests launched from an SBT task
 fork in Test := true
 
 logLevel := Level.Warn
@@ -61,9 +61,7 @@ logLevel in compile := Level.Warn
 logLevel in test := Level.Info
 
 // define the statements initially evaluated when entering 'console', 'console-quick', but not 'console-project'
-initialCommands in console := """import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
-                                |val scriptEngine: ScriptEngine = new ScriptEngineManager().getEngineByName("JavaScript")
-                                |val js: com.micronautics.cli.JavaScript = new com.micronautics.cli.JavaScript()
+initialCommands in console := """val js: com.micronautics.cli.JavaScript = new com.micronautics.cli.JavaScript()
                                 |js.eval("var x = 1")
                                 |js.show("x")
                                 |js.show("x = x + 1")

@@ -10,7 +10,7 @@ class JavaScript {
   import collection.JavaConverters._
   import CliLoop.terminal.{writer => TWriter}
 
-  lazy val scriptEngineManager = new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
+  protected lazy val scriptEngineManager = new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
 
   /* Sample output:
       2 scripting engines are available.
@@ -25,7 +25,7 @@ class JavaScript {
       Language Name = ECMAScript
       Language Version = ECMA - 262 Edition 5.1
       Names = nashorn, Nashorn, js, JS, JavaScript, javascript, ECMAScript, ecmascript */
-  def checkScriptEngine(): Unit = {
+  protected def checkScriptEngine(): Unit = {
     if (scriptEngineManager==null) {
       Console.err.println("\nError: scriptEngineManager is null!")
       System.exit(0)
@@ -41,6 +41,7 @@ class JavaScript {
                                          |""".stripMargin)
     }
   }
+
   /** This JavaScript interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
   def scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
