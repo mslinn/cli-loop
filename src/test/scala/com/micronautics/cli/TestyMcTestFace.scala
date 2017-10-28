@@ -11,19 +11,19 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
 
   "JavaScript" should {
     "work" in {
-      js.scriptEngine.put("ten", 10)
-      js.scriptEngine.get("ten")         shouldBe 10.asInstanceOf[AnyRef]
-      js.bindings.get("ten")             shouldBe 10.asInstanceOf[AnyRef]
+      js.put("ten", 10)
+      js.get("ten")         shouldBe 10.0
+      js.get("ten")         shouldBe 10.0
 
-      js.bindings.put("twenty", 20)
-      js.bindings.get("twenty")          shouldBe 20.asInstanceOf[AnyRef]
+      js.put("twenty", 20)
+      js.get("twenty")      shouldBe 20.0
 
-      js.scriptEngine.eval("var twelve = ten + 2")
-      js.scriptEngine.get("twelve")      shouldBe 12.asInstanceOf[AnyRef]
+      js.eval("var twelve = ten + 2")
+      js.get("twelve")      shouldBe 12.0
 
-      js.scriptEngine.eval("twelve")     shouldBe 12.asInstanceOf[AnyRef]
-      js.scriptEngine.eval("twelve * 2") shouldBe 24.asInstanceOf[AnyRef]
-      js.bindings.get("twelve")          shouldBe 12.asInstanceOf[AnyRef]
+      js.eval("twelve")     shouldBe 12.0
+      js.eval("twelve * 2") shouldBe 24.0
+      js.get("twelve")      shouldBe 12.0
     }
   }
 }

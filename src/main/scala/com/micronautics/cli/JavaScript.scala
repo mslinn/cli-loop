@@ -24,6 +24,15 @@ class JavaScript {
         e
     }
 
+  def get(name: String): AnyRef = scriptEngine.get(name)
+
+  /** All numbers in JavaScript are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
+    * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
+  def put(name: String, value: AnyVal): AnyRef = {
+    scriptEngine.put(name, value)
+    get(name)
+  }
+
   /** Initialize JavaScript instance */
   def setup(): JavaScript = {
     try {
