@@ -26,7 +26,6 @@ class JavaScript {
   def add: Int = safeEval("10 + 2").asInstanceOf[Int]
 
   def demo(): Unit = {
-    terminal.writer.println(CliLoop.error("Big bad error"))
     terminal.writer.println()
     terminal.flush()
     terminal.writer.println(print)
