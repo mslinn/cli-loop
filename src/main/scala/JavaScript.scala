@@ -23,7 +23,15 @@ class JavaScript {
     safeEval(s"""print("$message")""")
   }
 
-  def add: Int = safeEval("10 + 2").asInstanceOf[Int]
+  def add: Int = try {
+    safeEval("var x = 10 + 2;")
+    safeEval("x = x + 2;").asInstanceOf[Int]
+    safeEval("x").asInstanceOf[Int]
+  } catch {
+    case e: Exception =>
+      CliLoop.error(e.getMessage)
+      0
+  }
 
   def demo(): Unit = {
     terminal.writer.println()

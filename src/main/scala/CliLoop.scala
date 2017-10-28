@@ -14,7 +14,7 @@ object CliLoop extends CommandCompleter
   protected val useColor = true
   var mode: Mode = Mode.COMMAND
 
-  val prompt: String = new AttributedStringBuilder()
+  def prompt: String = new AttributedStringBuilder()
     .style(AttributedStyle.DEFAULT.background(AttributedStyle.GREEN))
     .append("beth")
     .style(AttributedStyle.DEFAULT)
@@ -64,9 +64,12 @@ object CliLoop extends CommandCompleter
 
         case _: EndOfFileException =>
           mode match {
-            case Mode.COMMAND => return
+            case Mode.COMMAND =>
+              terminal.writer.println("\nExiting program")
+              System.exit(0)
+
             case Mode.JAVASCRIPT =>
-              terminal.writer.println("\nCommand mode")
+              terminal.writer.println("\nReturning to command mode")
               mode = Mode.COMMAND
           }
           ""
@@ -187,6 +190,7 @@ object CliLoop extends CommandCompleter
 
       case "console" =>
         mode = Mode.JAVASCRIPT
+        terminal.writer.println("\nEntering JavaScript mode")
         new JavaScript().demo()
 
       case "help" | "?" =>
