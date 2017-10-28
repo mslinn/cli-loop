@@ -239,7 +239,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
       case "javascript" =>
         mode = Mode.JAVASCRIPT
         printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.")
-        new JavaScript().demo()
+        new JavaScript().peekPoke()
 
       case "help" | "?" =>
         terminal.writer.println()
