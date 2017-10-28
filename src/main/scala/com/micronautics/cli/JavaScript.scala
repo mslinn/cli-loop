@@ -7,18 +7,34 @@ object JavaScript {
 
 class JavaScript {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
+  import collection.JavaConverters._
+  import CliLoop.terminal.{writer => TWriter}
 
+  lazy val scriptEngineManager = new ScriptEngineManager()
+
+  def checkScriptEngine(): Unit = {
+    if (scriptEngineManager==null) {
+      Console.err.println("\nError: scriptEngineManager is null!")
+      System.exit(0)
+    }
+
+    TWriter.println(scriptEngineManager.getEngineFactories.size + " scripting engines are available.")
+    scriptEngineManager.getEngineFactories.asScala.foreach { engine =>
+      TWriter.println(s"""Engine Name = ${ engine.getEngineName }
+                                         |Engine Version = ${ engine.getEngineVersion }
+                                         |Language Name = ${ engine.getLanguageName }
+                                         |Language Version = ${ engine.getLanguageVersion }
+                                         |Names = ${ engine.getNames.asScala.mkString(", ") }
+                                         |""".stripMargin)
+    }
+  }
   /** This JavaScript interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
-  lazy val scriptEngine: ScriptEngine = new ScriptEngineManager().getEngineByName("JavaScript")
-
-  if (scriptEngine==null) {
-    Console.err.println("\nError: scriptEngine is null!")
-    System.exit(0)
-  }
+  def scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
 
   def eval(string: String): AnyRef =
     try {
+      checkScriptEngine()
       val value = scriptEngine.eval(string)
       val result: Any = value match {
         case x: java.lang.Boolean => Boolean.unbox(x)
@@ -55,6 +71,7 @@ class JavaScript {
   /** Initialize JavaScript instance */
   def setup(): JavaScript = {
     try {
+      // one day we might need to reload context from a previous session
     } catch {
       case e: Exception =>
         CliLoop.richError(e.getMessage)
