@@ -23,6 +23,11 @@ object CliLoop {
     case (name: String, alias: String) => name.length + alias.length + 1
   }.max
 
+  protected val defaultStyle: AttributedStyle = AttributedStyle.DEFAULT
+  protected val errorStyle: AttributedStyle = AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
+  protected val helpStyle: AttributedStyle = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
+  protected val infoStyle: AttributedStyle = AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA)
+
   val terminal: Terminal =
     TerminalBuilder.builder
       .system(true)
@@ -32,30 +37,34 @@ object CliLoop {
   protected def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)
                     (implicit asb: AttributedStringBuilder): AttributedStringBuilder = {
     asb
-      .style(AttributedStyle.DEFAULT.bold)
+      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
       .append(name)
-      .style(AttributedStyle.DEFAULT.boldOff)
+      .style(AttributedStyle.DEFAULT.foregroundDefault)
+      .style(AttributedStyle.DEFAULT.faint)
 
     if (isPenultimate)
       asb.append(" and ")
     else if (!isLast)
       asb.append(", ")
 
-    asb
+    asb.style(AttributedStyle.DEFAULT.faintDefault)
   }
 
   // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, alias: String)
-                       (implicit asb: AttributedStringBuilder): AttributedStringBuilder =
+                    (implicit asb: AttributedStringBuilder): AttributedStringBuilder =
     asb
-      .style(AttributedStyle.DEFAULT.bold)
+      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
       .append(name)
-      .style(AttributedStyle.DEFAULT.boldOff)
+      .style(AttributedStyle.DEFAULT.faint)
       .append("/")
-      .style(AttributedStyle.DEFAULT.bold)
+      .style(AttributedStyle.DEFAULT.faintDefault)
+      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
       .append(alias)
-      .style(AttributedStyle.DEFAULT.boldOff)
+      .style(AttributedStyle.DEFAULT.foregroundDefault)
+      .style(AttributedStyle.DEFAULT.faint)
       .append(", ")
+      .style(AttributedStyle.DEFAULT.faintDefault)
 
   @inline def printRichError(message: String): Unit = terminal.writer.println(richError(message))
 
@@ -64,17 +73,17 @@ object CliLoop {
   // todo test terminal capabilities to see how many of these styles are supported
   def richError(message: String): String =
     new AttributedStringBuilder()
-      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.RED))
+      .style(errorStyle)
       .append(" Error: " + message + " ")
-      .style(AttributedStyle.DEFAULT.foregroundDefault)
+      .style(defaultStyle)
       .toAnsi
 
   // todo test terminal capabilities to see how many of these styles are supported
   def info(message: String): String =
     new AttributedStringBuilder()
-      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
+      .style(infoStyle)
       .append(message)
-      .style(AttributedStyle.DEFAULT.foregroundDefault)
+      .style(defaultStyle)
       .toAnsi
 
   protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
@@ -86,7 +95,7 @@ object CliLoop {
     /** This implicit acts as a local accumulator for the rich help message */
     implicit val asb: AttributedStringBuilder =
       new AttributedStringBuilder()
-        .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
+        .style(helpStyle)
         .append("Commands are: ")
 
     commands.zipWithIndex.foreach { case (x, i) =>
@@ -98,14 +107,14 @@ object CliLoop {
       }
     }
 
-    asb.style(AttributedStyle.DEFAULT.foregroundDefault)
+    asb.style(defaultStyle)
     terminal.writer.println(asb.toAnsi)
 
     if (full) {
       /** This implicit acts as a local accumulator for the rich help message */
       implicit val asb: AttributedStringBuilder = new AttributedStringBuilder()
         .append("\n")
-        .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
+        .style(helpStyle)
 
       helpCmd("account",     "Ethereum account management")
       helpCmd("bindkey",     "Show all key bindings")
@@ -115,7 +124,7 @@ object CliLoop {
       helpCmd("testkey",     "Test a key binding")
       helpCmd("tput",        "Demonstrate a terminal capability, such as 'bell'")
 
-      asb.style(AttributedStyle.DEFAULT.foregroundDefault)
+      asb.style(defaultStyle)
       terminal.writer.println(asb.toAnsi)
     }
   }
@@ -128,8 +137,7 @@ object CliLoop {
       .append(name + " "*(cmdMaxWidth-name.length))
       .style(AttributedStyle.DEFAULT.boldOff)
       .append(" - ")
-      .append(message)
-      .append("\n")
+      .append(message + "\n")
 
   // todo test terminal capabilities to see how many of these styles are supported
   protected def helpCmd(name: String, alias: String, message: String)
@@ -145,7 +153,6 @@ object CliLoop {
       .append(" "*(cmdMaxWidth-name.length - alias.length - 1) + " - ")
       .append(message)
       .append("\n")
-
 }
 
 class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCompleter {
