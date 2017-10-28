@@ -16,7 +16,7 @@ object CliLoop {
   parser.setEofOnUnclosedQuote(true)
 
   // todo how to obtain the following list from the completer?
-  protected val commands = List("account", "bindkey", "console", ("help", "?"), "password", "set", "testkey", "tput")
+  protected val commands = List("account", "bindkey", "console", "exit", ("help", "?"), "password", "set", "testkey", "tput")
 
   protected val cmdMaxWidth: Int = commands.map {
     case string: String => string.length
@@ -28,6 +28,7 @@ object CliLoop {
       .system(true)
       .build
 
+  // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)
                        (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder = {
     attributedStringBuilder
@@ -43,6 +44,7 @@ object CliLoop {
     attributedStringBuilder
   }
 
+  // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, alias: String)
                        (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
     attributedStringBuilder
@@ -55,6 +57,7 @@ object CliLoop {
       .style(AttributedStyle.DEFAULT)
       .append(", ")
 
+  // todo test terminal capabilities to see how many of these styles are supported
   def error(message: String): String =
     new AttributedStringBuilder()
       .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.RED))
@@ -62,10 +65,19 @@ object CliLoop {
       .style(AttributedStyle.DEFAULT)
       .toAnsi
 
-  protected def repo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
+  // todo test terminal capabilities to see how many of these styles are supported
+  def info(message: String): String =
+    new AttributedStringBuilder()
+      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
+      .append(message)
+      .style(AttributedStyle.DEFAULT)
+      .toAnsi
 
-  protected def gitBranch: String = repo.getBranch
+  protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
 
+  protected def gitBranch: String = gitRepo.getBranch
+
+  // todo add parameters for helpCmd name/value tuples/triples
   protected def help(full: Boolean = false): Unit = {
     implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("Commands are: ")
     commands.zipWithIndex.foreach { case (x, i) =>
@@ -91,6 +103,7 @@ object CliLoop {
     }
   }
 
+  // todo test terminal capabilities to see how many of these styles are supported
   protected def helpCmd(name: String, message: String)
                        (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
     attributedStringBuilder
@@ -101,6 +114,7 @@ object CliLoop {
       .append(message)
       .append("\n")
 
+  // todo test terminal capabilities to see how many of these styles are supported
   protected def helpCmd(name: String, alias: String, message: String)
                        (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
     attributedStringBuilder
@@ -123,17 +137,20 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
   protected val useColor = true
   var mode: Mode = Mode.COMMAND
 
+  // todo test terminal capabilities to see how many of these styles are supported
   protected def prompt: String = new AttributedStringBuilder()
-    .style(AttributedStyle.DEFAULT.background(AttributedStyle.GREEN))
+    .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
     .append(promptName)
-    .style(AttributedStyle.DEFAULT)
+    .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
     .append(s" [$gitBranch]")
     .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-    .append(s" ${ mode.name }")
-    .style(AttributedStyle.DEFAULT)
+    .append(s" ${ mode.name.toLowerCase }")
+    .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA))
     .append("> ")
+    .style(AttributedStyle.DEFAULT)
     .toAnsi
 
+  // todo probably make this overridable or configurable
   protected val reader: LineReader = LineReaderBuilder.builder
     .terminal(terminal)
     .completer(treeCompleter)
@@ -145,7 +162,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
     loop()
   }
 
-  def loop(): Unit = {
+  protected def loop(): Unit = {
     val trigger: Option[String] = Some("password")
     val mask: Character = null  // LineReader.readLine uses null to control behavior // TODO set this value
     var more = true
@@ -172,7 +189,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
             ""
         }
 
-      if (line != null) {
+      if (line != null && line.trim.nonEmpty) {
         line = line.trim
 
         // If the trigger word is input then the next input line is masked
@@ -196,7 +213,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
 
       case "console" =>
         mode = Mode.JAVASCRIPT
-        terminal.writer.println("\nEntering JavaScript mode")
+        terminal.writer.println(info("Entering JavaScript mode. Type Control-d to return to command mode."))
         new JavaScript().demo()
 
       case "help" | "?" =>
