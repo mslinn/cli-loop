@@ -14,7 +14,7 @@ object CliLoop extends ComplexStringCompleter
   with SampleRegexCompleter {
   protected val useColor = true
 
-  protected val terminal: Terminal =
+  val terminal: Terminal =
     TerminalBuilder.builder
       .system(true)
       .build
@@ -66,7 +66,7 @@ object CliLoop extends ComplexStringCompleter
   }
 
   // todo how to obtain the following list from the completer?
-  protected val commands = List("bindkey", "cls", "custom", ("help", "?"), "password", "set", "testkey", "tput")
+  protected val commands = List("account", "bindkey", "console", ("help", "?"), "password", "set", "testkey", "tput")
 
   protected val cmdMaxWidth: Int = commands.map {
     case string: String => string.length
@@ -87,13 +87,13 @@ object CliLoop extends ComplexStringCompleter
 
     if (full) {
       implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("\n")
-      helpCmd("bindkey", "shows all key bindings")
-      helpCmd("cls",     "clears the screen")
-      helpCmd("custom",  "demonstrates a TreeCompleter")
+      helpCmd("bindkey",   "shows all key bindings")
+      helpCmd("console",   "display JavaScript console")
+      helpCmd("account",   "Ethereum account management")
       helpCmd("help", "?", "displays this message")
-      helpCmd("set",     s"set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'")
-      helpCmd("testkey", "tests a key binding")
-      helpCmd("tput",    "demonstrates a terminal capability, such as 'bell'")
+      helpCmd("set",       s"set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'")
+      helpCmd("testkey",   "tests a key binding")
+      helpCmd("tput",      "demonstrates a terminal capability, such as 'bell'")
       terminal.writer.println(asb.toAnsi)
     }
   }
@@ -125,6 +125,13 @@ object CliLoop extends ComplexStringCompleter
       .style(AttributedStyle.DEFAULT)
       .append(", ")
 
+  def error(message: String): String =
+    new AttributedStringBuilder()
+      .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.RED))
+      .append(" Error: " + message + " ")
+      .style(AttributedStyle.DEFAULT)
+      .toAnsi
+
   protected def helpCmd(name: String, message: String)
                        (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
     attributedStringBuilder
@@ -152,13 +159,12 @@ object CliLoop extends ComplexStringCompleter
   protected def processLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
     parsedLine.word match {
+      case "account" => account(parsedLine)
+
       case "bindkey" => bindKey(parsedLine)
 
-      case "cls" =>
-        terminal.puts(Capability.clear_screen)
-        terminal.flush()
-
-      case "custom" => custom(parsedLine)
+      case "console" =>
+        new JavaScript().demo()
 
       case "help" | "?" =>
         println
@@ -180,7 +186,7 @@ object CliLoop extends ComplexStringCompleter
     }
   }
 
-  protected def custom(pl: ParsedLine): Unit =
+  protected def account(pl: ParsedLine): Unit =
     terminal.writer.println(
       s"""parsedLine: word = ${ pl.word }, wordIndex = ${ pl.wordIndex }, wordCursor = ${ pl.wordCursor }, cursor = ${ pl.cursor }
          |words = ${ pl.words.asScala.mkString(", ") }

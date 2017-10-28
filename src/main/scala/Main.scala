@@ -43,9 +43,9 @@ trait ComplexStringCompleter {
 trait CustomCompleter {
   val customCompleter: Completer = (reader: LineReader, line: ParsedLine, candidates: JList[Candidate]) => {
     if (line.wordIndex == 0) {
-      candidates.add(new Candidate("custom"))
+      candidates.add(new Candidate("account"))
       ()
-    } else if (line.words.get(0) == "custom")
+    } else if (line.words.get(0) == "account")
       if (line.words.get(line.wordIndex - 1) == "Option1") {
         candidates.add(new Candidate("Param1"))
         candidates.add(new Candidate("Param2"))
@@ -63,7 +63,7 @@ trait MiscCompleters {
   val fileNameCompleter: FileNameCompleter = new FileNameCompleter
 
   val commandStringsCompleter: StringsCompleter =
-    new StringsCompleter("bindkey", "cls", "custom", "help", "set", "sleep", "testkey", "tput")
+    new StringsCompleter("bindkey", "cls", "account", "help", "set", "sleep", "testkey", "tput")
 }
 
 trait CommandCompleter extends MiscCompleters with SampleTreeCompleter {
@@ -96,18 +96,19 @@ trait SampleRegexCompleter {
 
 trait SampleTreeCompleter {
   val nodes: List[TreeCompleter.Node] = List(
-    node("bindkey"),
-    node("cls"),
     node(
-      "custom",
-      node("option1", node("param1", "param2")),
-      node("option2"),
-      node("option3")
+      "account",
+      node("import", node("<keyFile>")),
+      node("list"),
+      node("new"),
+      node("update", node("<accountAddress>"))
     ),
+    node("bindkey"),
+    node("console"),
     node("help"),
     node("password"),
-    node("set", node("name"), node("newValue")),
-    node("testkey", node("key")),
+    node("set", node("name"), node("<newValue>")),
+    node("testkey", node("<key>")),
     node("tput", node("bell"))
   )
   val treeCompleter: TreeCompleter = new TreeCompleter(nodes: _*)
