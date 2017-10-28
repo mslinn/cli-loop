@@ -70,13 +70,9 @@ class CommandShell extends CliLoop("beth") {
     }
   }
 
-  protected def processJavaScriptLine(line: String): Unit = {
-    val result: AnyRef = javaScript.eval(line)
-    printRichInfo(result.toString)
-    ()
-  }
+  protected def processJavaScriptLine(line: String): AnyRef = javaScript.eval(line)
 
-  def signInMessage(): Unit = printRichHelp("Press <tab> for tab completion of commands and options.\n")
+  def signInMessage(): Unit = printRichHelp("Press <tab> multiple times for tab completion of commands and options.\n")
 
   protected def account(pl: ParsedLine): Unit =
     terminal.writer.println(

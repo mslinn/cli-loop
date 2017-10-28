@@ -45,7 +45,7 @@ abstract class CliLoop(promptName: String) {
 
   protected def processCommandLine(line: String): Unit
 
-  protected def processJavaScriptLine(line: String): Unit
+  protected def processJavaScriptLine(line: String): AnyRef
 
   def signInMessage(): Unit
 

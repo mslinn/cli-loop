@@ -21,6 +21,7 @@ trait CliBase {
   val errorStyle: AttributedStyle   = AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
   val helpStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
   val infoStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA)
+  val jsStyle: AttributedStyle      = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
 
   lazy val terminal: Terminal =
     TerminalBuilder.builder
@@ -76,6 +77,8 @@ trait CliBase {
 
   @inline def printRichHelp(message: String): Unit = terminal.writer.println(help(message))
 
+  @inline def printJsResult(message: String): Unit = terminal.writer.println(js(message))
+
   def richError(message: String): String = {
     val asBuilder = new AttributedStringBuilder
     if (!TerminalCapabilities.supportsAnsi) asBuilder.append(s" Error: $message ")
@@ -99,6 +102,15 @@ trait CliBase {
     if (!TerminalCapabilities.supportsAnsi) asBuilder.append(message)
         else asBuilder
               .style(infoStyle)
+              .append(message)
+              .style(defaultStyle)
+  }.toAnsi
+
+  def js(message: String): String = {
+    val asBuilder = new AttributedStringBuilder
+    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(message)
+        else asBuilder
+              .style(jsStyle)
               .append(message)
               .style(defaultStyle)
   }.toAnsi
