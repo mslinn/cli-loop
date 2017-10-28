@@ -1,6 +1,6 @@
-import com.micronautics.cli.CliLoop
+import com.micronautics.cli.CommandShell
 
 object Main extends App {
-  new CliLoop(promptName = "beth").run()
+  new CommandShell().run()
 }
 
