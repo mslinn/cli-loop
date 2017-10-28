@@ -34,7 +34,7 @@ trait SampleTreeCompleter {
       node("update", node("<accountAddress>"))
     ),
     node("bindkey"),
-    node("console"),
+    node("javascript"),
     node("help"),
     node("password"),
     node("set", node("name"), node("<newValue>")),

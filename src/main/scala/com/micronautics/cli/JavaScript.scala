@@ -16,7 +16,7 @@ class JavaScript {
       eval(string)
     } catch {
       case e: Exception =>
-        terminal.writer.print(CliLoop.error(e.getMessage))
+        terminal.writer.print(CliLoop.richError(e.getMessage))
         e
     }
 
@@ -31,7 +31,7 @@ class JavaScript {
     safeEval("x").asInstanceOf[Int]
   } catch {
     case e: Exception =>
-      CliLoop.error(e.getMessage)
+      CliLoop.richError(e.getMessage)
       0
   }
 

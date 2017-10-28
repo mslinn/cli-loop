@@ -16,7 +16,7 @@ object CliLoop {
   parser.setEofOnUnclosedQuote(true)
 
   // todo how to obtain the following list from the completer?
-  protected val commands = List("account", "bindkey", "console", "exit", ("help", "?"), "password", "set", "testkey", "tput")
+  protected val commands = List("account", "bindkey", "javascript", "exit", ("help", "?"), "password", "set", "testkey", "tput")
 
   protected val cmdMaxWidth: Int = commands.map {
     case string: String => string.length
@@ -30,39 +30,43 @@ object CliLoop {
 
   // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)
-                       (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder = {
-    attributedStringBuilder
+                    (implicit asb: AttributedStringBuilder): AttributedStringBuilder = {
+    asb
       .style(AttributedStyle.DEFAULT.bold)
       .append(name)
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.boldOff)
 
     if (isPenultimate)
-      attributedStringBuilder.append(" and ")
+      asb.append(" and ")
     else if (!isLast)
-      attributedStringBuilder.append(", ")
+      asb.append(", ")
 
-    attributedStringBuilder
+    asb
   }
 
   // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, alias: String)
-                       (implicit attributedStringBuilder: AttributedStringBuilder): AttributedStringBuilder =
-    attributedStringBuilder
+                       (implicit asb: AttributedStringBuilder): AttributedStringBuilder =
+    asb
       .style(AttributedStyle.DEFAULT.bold)
       .append(name)
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.boldOff)
       .append("/")
       .style(AttributedStyle.DEFAULT.bold)
       .append(alias)
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.boldOff)
       .append(", ")
 
+  @inline def printRichError(message: String): Unit = terminal.writer.println(richError(message))
+
+  @inline def printRichInfo(message: String): Unit = terminal.writer.println(info(message))
+
   // todo test terminal capabilities to see how many of these styles are supported
-  def error(message: String): String =
+  def richError(message: String): String =
     new AttributedStringBuilder()
       .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.RED))
       .append(" Error: " + message + " ")
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.foregroundDefault)
       .toAnsi
 
   // todo test terminal capabilities to see how many of these styles are supported
@@ -70,7 +74,7 @@ object CliLoop {
     new AttributedStringBuilder()
       .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
       .append(message)
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.foregroundDefault)
       .toAnsi
 
   protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
@@ -79,7 +83,12 @@ object CliLoop {
 
   // todo add parameters for helpCmd name/value tuples/triples
   protected def help(full: Boolean = false): Unit = {
-    implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("Commands are: ")
+    /** This implicit acts as a local accumulator for the rich help message */
+    implicit val asb: AttributedStringBuilder =
+      new AttributedStringBuilder()
+        .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
+        .append("Commands are: ")
+
     commands.zipWithIndex.foreach { case (x, i) =>
       x match {
         case name: String if i==commands.length-1 => bold(name, isLast=true)
@@ -88,17 +97,25 @@ object CliLoop {
         case (name: String, alias: String) => bold(name, alias)
       }
     }
+
+    asb.style(AttributedStyle.DEFAULT.foregroundDefault)
     terminal.writer.println(asb.toAnsi)
 
     if (full) {
-      implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("\n")
-      helpCmd("bindkey",   "shows all key bindings")
-      helpCmd("console",   "display JavaScript console")
-      helpCmd("account",   "Ethereum account management")
-      helpCmd("help", "?", "displays this message")
-      helpCmd("set",       s"set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'")
-      helpCmd("testkey",   "tests a key binding")
-      helpCmd("tput",      "demonstrates a terminal capability, such as 'bell'")
+      /** This implicit acts as a local accumulator for the rich help message */
+      implicit val asb: AttributedStringBuilder = new AttributedStringBuilder()
+        .append("\n")
+        .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN))
+
+      helpCmd("account",     "Ethereum account management")
+      helpCmd("bindkey",     "Show all key bindings")
+      helpCmd("javascript",  "Enter JavaScript console")
+      helpCmd("help", "?",   "Display this message")
+      helpCmd("set",        s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'")
+      helpCmd("testkey",     "Test a key binding")
+      helpCmd("tput",        "Demonstrate a terminal capability, such as 'bell'")
+
+      asb.style(AttributedStyle.DEFAULT.foregroundDefault)
       terminal.writer.println(asb.toAnsi)
     }
   }
@@ -109,7 +126,7 @@ object CliLoop {
     attributedStringBuilder
       .style(AttributedStyle.DEFAULT.bold)
       .append(name + " "*(cmdMaxWidth-name.length))
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.boldOff)
       .append(" - ")
       .append(message)
       .append("\n")
@@ -120,11 +137,11 @@ object CliLoop {
     attributedStringBuilder
       .style(AttributedStyle.DEFAULT.bold)
       .append(name)
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.boldOff)
       .append("/")
       .style(AttributedStyle.DEFAULT.bold)
       .append(alias)
-      .style(AttributedStyle.DEFAULT)
+      .style(AttributedStyle.DEFAULT.boldOff)
       .append(" "*(cmdMaxWidth-name.length - alias.length - 1) + " - ")
       .append(message)
       .append("\n")
@@ -147,7 +164,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
     .append(s" ${ mode.name.toLowerCase }")
     .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA))
     .append("> ")
-    .style(AttributedStyle.DEFAULT)
+    .style(AttributedStyle.DEFAULT.foregroundDefault)
     .toAnsi
 
   // todo probably make this overridable or configurable
@@ -173,17 +190,18 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
           reader.readLine(prompt)
         } catch {
           case _: UserInterruptException =>
-            terminal.writer.println("Press Control-D to exit")
+            printRichInfo("Press Control-D to exit.")
             ""
 
           case _: EndOfFileException =>
             mode match {
               case Mode.COMMAND =>
-                terminal.writer.println("\nExiting program")
+                printRichInfo("\nExiting program.")
                 System.exit(0)
 
               case Mode.JAVASCRIPT =>
-                terminal.writer.println("\nReturning to command mode")
+                printRichInfo("\nReturning to command mode.")
+                help()
                 mode = Mode.COMMAND
             }
             ""
@@ -211,9 +229,9 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
 
       case "bindkey" => bindKey(parsedLine)
 
-      case "console" =>
+      case "javascript" =>
         mode = Mode.JAVASCRIPT
-        terminal.writer.println(info("Entering JavaScript mode. Type Control-d to return to command mode."))
+        printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.")
         new JavaScript().demo()
 
       case "help" | "?" =>
@@ -231,7 +249,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
         help()
 
       case x =>
-        terminal.writer.println(s"Error: '$x' is an unknown command.")
+        printRichError(s"'$x' is an unknown command.")
         help()
     }
   }
@@ -293,16 +311,16 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
   protected def set(parsedLine: ParsedLine): Unit = {
     parsedLine.words.size match {
       case 1 =>
-        terminal.writer.println("\nError: no variable name or value specified")
+        printRichError("\nNo variable name or value specified")
 
       case 2 =>
-        terminal.writer.println("\nError: no new value specified for " + parsedLine.words.get(0))
+        printRichError("\nNo new value specified for " + parsedLine.words.get(0))
 
       case 3 =>
         reader.setVariable(parsedLine.words.get(0), parsedLine.words.get(1))
 
       case n =>
-        terminal.writer.println("\nError: Only one new value may be specified " +
+        printRichError("\nOnly one new value may be specified " +
           s"(you specified ${n - 2} values for ${parsedLine.words.get(0)})")
     }
   }
@@ -323,7 +341,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
 
   protected def tput(parsedLine: ParsedLine): Unit = parsedLine.words.size match {
     case 1 =>
-      terminal.writer.println("No capability specified (try 'bell')")
+      printRichError("No capability specified (try 'bell')")
 
     case 2 =>
       Option(Capability.byName(parsedLine.words.get(1))).map { capability =>
@@ -331,12 +349,12 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
         terminal.flush()
         true
       }.getOrElse {
-        terminal.writer.println("Unknown capability")
+        printRichError("Unknown capability")
         false
       }
       ()
 
     case n =>
-      terminal.writer.println(s"Only one capability may be specified (you specified ${ n - 1 })")
+      printRichError(s"Only one capability may be specified (you specified ${ n - 1 })")
   }
 }
