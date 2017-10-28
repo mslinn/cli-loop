@@ -3,17 +3,17 @@ package com.micronautics.cli
 object JavaScript {
 }
 
-class JavaScript() {
+class JavaScript {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
   import com.micronautics.cli.CliLoop.terminal
 
-  protected lazy val scriptEngineManager = new ScriptEngineManager
+  protected[cli] lazy val scriptEngineManager = new ScriptEngineManager
 
   /** This JavaScript interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
-  protected lazy val scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
+  protected[cli] lazy val scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
 
-  def safeEval(string: String): AnyRef =
+  def eval(string: String): AnyRef =
     try {
       terminal.writer.println()
       terminal.flush()
@@ -27,19 +27,6 @@ class JavaScript() {
   /** Initialize JavaScript instance */
   def setup(): JavaScript = {
     try {
-      scriptEngine.put("ten", 10)
-      assert(scriptEngine.get("ten") == 10.asInstanceOf[AnyRef])
-      assert(bindings.get("ten") == 10.asInstanceOf[AnyRef])
-
-      bindings.put("twenty", 20)
-      assert(bindings.get("twenty") == 20.asInstanceOf[AnyRef])
-
-      scriptEngine.eval("var twelve = ten + 2")
-      assert(scriptEngine.get("twelve") == 12.asInstanceOf[AnyRef])
-
-      assert(scriptEngine.eval("twelve") == 12.asInstanceOf[AnyRef])
-      assert(scriptEngine.eval("twelve * 2") == 24.asInstanceOf[AnyRef])
-      assert(bindings.get("twelve") == 12.asInstanceOf[AnyRef])
     } catch {
       case e: Exception =>
         CliLoop.richError(e.getMessage)
@@ -47,5 +34,11 @@ class JavaScript() {
     this
   }
 
-  protected def bindings: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
+  def show(expression: String): JavaScript = {
+    val result: AnyRef = eval(expression)
+    println(s"$expression => $result")
+    this
+  }
+
+  protected[cli] def bindings: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
 }

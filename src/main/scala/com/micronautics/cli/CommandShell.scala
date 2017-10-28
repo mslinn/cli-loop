@@ -71,7 +71,7 @@ class CommandShell extends CliLoop("beth") {
   }
 
   protected def processJavaScriptLine(line: String): Unit = {
-    val result: AnyRef = javaScript.safeEval(line)
+    val result: AnyRef = javaScript.eval(line)
     printRichInfo(result.toString)
     ()
   }
