@@ -1,18 +1,29 @@
 import java.util.{Map => JMap}
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.{DefaultParser, LineReaderImpl}
 import org.jline.reader.{Binding, EndOfFileException, LineReader, LineReaderBuilder, Macro, ParsedLine, Reference, UserInterruptException}
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.InfoCmp.Capability
-import org.jline.utils.{AttributedString, AttributedStringBuilder, AttributedStyle}
+import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 import scala.collection.JavaConverters._
 
-object CliLoop extends ComplexStringCompleter
-  with CustomCompleter
-  with CommandCompleter
-  with SampleArgumentCompleter
-  with SampleRegexCompleter {
+object CliLoop extends CommandCompleter
+  with SampleArgumentCompleter {
   protected val useColor = true
+  var mode: Mode = Mode.COMMAND
+
+  val prompt: String = new AttributedStringBuilder()
+    .style(AttributedStyle.DEFAULT.background(AttributedStyle.GREEN))
+    .append("beth")
+    .style(AttributedStyle.DEFAULT)
+    .append(s" [$gitBranch]")
+    .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
+    .append(s" ${ mode.name }")
+    .style(AttributedStyle.DEFAULT)
+    .append("> ")
+    .toAnsi
 
   val terminal: Terminal =
     TerminalBuilder.builder
@@ -33,6 +44,10 @@ object CliLoop extends ComplexStringCompleter
     loop()
   }
 
+  protected def repo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
+
+  def gitBranch: String = repo.getBranch
+
   def loop(): Unit = {
     val trigger: Option[String] = Some("password")
     val mask: Character = null  // LineReader.readLine uses null to control behavior // TODO set this value
@@ -41,14 +56,21 @@ object CliLoop extends ComplexStringCompleter
     while (more) {
       var line: String =
       try {
-        //reader.readLine(prompt, rightPrompt, null.asInstanceOf[MaskingCallback], null) // right prompt is annoying
         reader.readLine(prompt)
       } catch {
         case _: UserInterruptException =>
-          println("Press Control-D to exit")
+          terminal.writer.println("Press Control-D to exit")
           ""
 
-        case _: EndOfFileException => return
+        case _: EndOfFileException =>
+          mode match {
+            case Mode.COMMAND => return
+            case Mode.JAVASCRIPT =>
+              terminal.writer.println("\nCommand mode")
+              mode = Mode.COMMAND
+          }
+          ""
+
       }
       if (line != null) {
         line = line.trim
@@ -164,10 +186,11 @@ object CliLoop extends ComplexStringCompleter
       case "bindkey" => bindKey(parsedLine)
 
       case "console" =>
+        mode = Mode.JAVASCRIPT
         new JavaScript().demo()
 
       case "help" | "?" =>
-        println
+        terminal.writer.println()
         help(true)
 
       case "set" => set(parsedLine)
@@ -177,11 +200,11 @@ object CliLoop extends ComplexStringCompleter
       case "tput" => tput(parsedLine)
 
       case "" =>
-        println
+        terminal.writer.println()
         help()
 
       case x =>
-        println(s"Error: '$x' is an unknown command.")
+        terminal.writer.println(s"Error: '$x' is an unknown command.")
         help()
     }
   }
@@ -238,17 +261,6 @@ object CliLoop extends ComplexStringCompleter
         new Reference(parsedLine.words.get(2)), KeyMap.translate(parsedLine.words.get(1))
       )
     }
-  }
-
-  protected def echoInput(line: String): Unit = {
-    terminal.writer.println(
-      if (useColor) {
-        AttributedString.fromAnsi(s"""\u001B[33m======>\u001B[0m"$line"""").toAnsi(terminal)
-      } else {
-        s"""======>"$line""""
-      }
-    )
-    terminal.flush()
   }
 
   protected def set(parsedLine: ParsedLine): Unit = {

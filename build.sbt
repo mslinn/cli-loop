@@ -40,7 +40,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.jline"         % "jline"        % "3.5.1" withSources(),
+  "org.jline"         %  "jline"            % "3.5.1" withSources(),
+  "org.eclipse.jgit"  %  "org.eclipse.jgit" % "4.9.0.201710071750-r" withSources(),
   //
   "org.scalatest"     %% "scalatest"   % "3.0.3" % Test withSources(),
   "junit"             %  "junit"       % "4.12"  % Test
