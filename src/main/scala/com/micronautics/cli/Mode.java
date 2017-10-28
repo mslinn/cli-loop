@@ -1,6 +1,5 @@
-/**
- * @author mslin_000
- */
+package com.micronautics.cli;
+
 public enum Mode {
     COMMAND, JAVASCRIPT
 }

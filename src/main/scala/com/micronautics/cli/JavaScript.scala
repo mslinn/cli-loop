@@ -1,3 +1,5 @@
+package com.micronautics.cli
+
 import javax.script.{ScriptEngine, ScriptEngineManager}
 
 object JavaScript {
@@ -6,8 +8,8 @@ object JavaScript {
 }
 
 class JavaScript {
-  import JavaScript.nashorn.eval
-  import CliLoop.terminal
+  import com.micronautics.cli.CliLoop.terminal
+  import com.micronautics.cli.JavaScript.nashorn.eval
 
   def safeEval(string: String): AnyRef =
     try {
