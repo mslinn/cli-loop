@@ -11,7 +11,7 @@ class JavaScript {
 
   /** This JavaScript interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
-  protected[cli] lazy val scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
+  lazy val scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
 
   def eval(string: String): AnyRef =
     try {
@@ -25,6 +25,8 @@ class JavaScript {
     }
 
   def get(name: String): AnyRef = scriptEngine.get(name)
+
+  def isDefined(name: String): Boolean = bindings.containsKey(name)
 
   /** All numbers in JavaScript are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
     * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */

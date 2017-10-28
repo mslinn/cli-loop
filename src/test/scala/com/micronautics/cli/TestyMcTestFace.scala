@@ -11,7 +11,9 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
 
   "JavaScript" should {
     "work" in {
+      js.isDefined("ten")   shouldBe false
       js.put("ten", 10)
+      js.isDefined("ten")   shouldBe true
       js.get("ten")         shouldBe 10.0
       js.get("ten")         shouldBe 10.0
 
@@ -24,6 +26,9 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
       js.eval("twelve")     shouldBe 12.0
       js.eval("twelve * 2") shouldBe 24.0
       js.get("twelve")      shouldBe 12.0
+
+      js.put("y", 99)
+      js.get("y")           shouldBe 99.0
     }
   }
 }
