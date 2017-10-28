@@ -10,8 +10,21 @@ class JavaScript {
   import collection.JavaConverters._
   import CliLoop.terminal.{writer => TWriter}
 
-  lazy val scriptEngineManager = new ScriptEngineManager()
+  lazy val scriptEngineManager = new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
 
+  /* Sample output:
+      2 scripting engines are available.
+      Engine Name = Scala REPL
+      Engine Version = 2.0
+      Language Name = Scala
+      Language Version = version 2.12.4
+      Names = scala
+
+      Engine Name = Oracle Nashorn
+      Engine Version = 1.8.0_151
+      Language Name = ECMAScript
+      Language Version = ECMA - 262 Edition 5.1
+      Names = nashorn, Nashorn, js, JS, JavaScript, javascript, ECMAScript, ecmascript */
   def checkScriptEngine(): Unit = {
     if (scriptEngineManager==null) {
       Console.err.println("\nError: scriptEngineManager is null!")
@@ -34,7 +47,7 @@ class JavaScript {
 
   def eval(string: String): AnyRef =
     try {
-      checkScriptEngine()
+      if (scriptEngine==null) checkScriptEngine()
       val value = scriptEngine.eval(string)
       val result: Any = value match {
         case x: java.lang.Boolean => Boolean.unbox(x)

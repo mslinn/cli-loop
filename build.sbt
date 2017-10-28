@@ -48,6 +48,9 @@ libraryDependencies ++= Seq(
   "junit"             %  "junit"       % "4.12"  % Test
 )
 
+// Nashorn is not found unless tests fork
+fork in Test := true
+
 logLevel := Level.Warn
 
 // Only show warnings and errors on the screen for compilations.
