@@ -24,9 +24,9 @@ object CliLoop {
   }.max
 
   protected val defaultStyle: AttributedStyle = AttributedStyle.DEFAULT
-  protected val errorStyle: AttributedStyle = AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
-  protected val helpStyle: AttributedStyle = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
-  protected val infoStyle: AttributedStyle = AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA)
+  protected val errorStyle: AttributedStyle   = AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
+  protected val helpStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
+  protected val infoStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA)
 
   val terminal: Terminal =
     TerminalBuilder.builder
@@ -35,25 +35,25 @@ object CliLoop {
 
   // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)
-                    (implicit asb: AttributedStringBuilder): AttributedStringBuilder = {
-    asb
+                    (implicit asBuilder: AttributedStringBuilder): AttributedStringBuilder = {
+    asBuilder
       .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
       .append(name)
       .style(AttributedStyle.DEFAULT.foregroundDefault)
       .style(AttributedStyle.DEFAULT.faint)
 
     if (isPenultimate)
-      asb.append(" and ")
+      asBuilder.append(" and ")
     else if (!isLast)
-      asb.append(", ")
+      asBuilder.append(", ")
 
-    asb.style(AttributedStyle.DEFAULT.faintDefault)
+    asBuilder.style(AttributedStyle.DEFAULT.faintDefault)
   }
 
   // todo test terminal capabilities to see how many of these styles are supported
   protected def bold(name: String, alias: String)
-                    (implicit asb: AttributedStringBuilder): AttributedStringBuilder =
-    asb
+                    (implicit asBuilder: AttributedStringBuilder): AttributedStringBuilder =
+    asBuilder
       .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
       .append(name)
       .style(AttributedStyle.DEFAULT.faint)
@@ -70,11 +70,21 @@ object CliLoop {
 
   @inline def printRichInfo(message: String): Unit = terminal.writer.println(info(message))
 
+  @inline def printRichHelp(message: String): Unit = terminal.writer.println(help(message))
+
   // todo test terminal capabilities to see how many of these styles are supported
   def richError(message: String): String =
     new AttributedStringBuilder()
       .style(errorStyle)
       .append(" Error: " + message + " ")
+      .style(defaultStyle)
+      .toAnsi
+
+  // todo test terminal capabilities to see how many of these styles are supported
+  def help(message: String): String =
+    new AttributedStringBuilder()
+      .style(helpStyle)
+      .append(message)
       .style(defaultStyle)
       .toAnsi
 
@@ -188,6 +198,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
 
   def run(): Unit = {
     help()
+    signInMessage()
     loop()
   }
 
@@ -241,6 +252,8 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
     printRichInfo(result.toString)
     ()
   }
+
+  def signInMessage(): Unit = printRichHelp("Press <tab> for tab completion of commands and options.\n")
 
   protected def processCommandLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
