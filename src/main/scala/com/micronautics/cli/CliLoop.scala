@@ -180,6 +180,9 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
     .completer(treeCompleter)
     .parser(parser)
     .build
+  // If the user's first keypress is a tab, all of the top-level node values are displayed, thereby displaying the available commands
+  reader.unsetOpt(LineReader.Option.INSERT_TAB)
+
 
   def run(): Unit = {
     help()
