@@ -16,7 +16,7 @@ object CliLoop {
   parser.setEofOnUnclosedQuote(true)
 
   // todo how to obtain the following list from the completer?
-  protected val commands = List("account", "bindkey", "javascript", "exit", ("help", "?"), "password", "set", "testkey", "tput")
+  protected val commands = List("account", "bindkey", ("exit", "^d"), "javascript", ("help", "?"), "password", "set", "testkey", "tput")
 
   protected val cmdMaxWidth: Int = commands.map {
     case string: String => string.length
@@ -184,6 +184,8 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
   reader.unsetOpt(LineReader.Option.INSERT_TAB)
 
 
+  protected val javaScript: JavaScript = new JavaScript().setup()
+
   def run(): Unit = {
     help()
     loop()
@@ -210,7 +212,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
                 System.exit(0)
 
               case Mode.JAVASCRIPT =>
-                printRichInfo("\nReturning to command mode.")
+                printRichInfo("Returning to command mode.\n")
                 help()
                 mode = Mode.COMMAND
             }
@@ -226,13 +228,21 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
 
         if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit"))
           more = false
-        else
-          processLine(line)
+        else if (mode==Mode.COMMAND)
+          processCommandLine(line)
+        else if (mode==Mode.JAVASCRIPT)
+          processJavaScriptLine(line)
       }
     }
   }
 
-  protected def processLine(line: String): Unit = {
+  protected def processJavaScriptLine(line: String): Unit = {
+    val result: AnyRef = javaScript.safeEval(line)
+    printRichInfo(result.toString)
+    ()
+  }
+
+  protected def processCommandLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
     parsedLine.word match {
       case "account" => account(parsedLine)
@@ -241,8 +251,7 @@ class CliLoop(promptName: String) extends CommandCompleter with SampleArgumentCo
 
       case "javascript" =>
         mode = Mode.JAVASCRIPT
-        printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.")
-        new JavaScript().peekPoke()
+        printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.\n")
 
       case "help" | "?" =>
         terminal.writer.println()
