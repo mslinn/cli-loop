@@ -44,9 +44,11 @@ libraryDependencies ++= Seq(
   "org.eclipse.jgit"  %  "org.eclipse.jgit" % "4.9.0.201710071750-r" withSources(),
   "ch.qos.logback"    %  "logback-classic"  % "1.2.3",
   //
-  "org.scalatest"     %% "scalatest"   % "3.0.3" % Test withSources(),
-  "junit"             %  "junit"       % "4.12"  % Test
+  "org.scalatest"     %% "scalatest"        % "3.0.3" % Test withSources(),
+  "junit"             %  "junit"            % "4.12"  % Test
 )
+
+fork in Test := true // https://stackoverflow.com/a/23575337/553865
 
 logLevel := Level.Warn
 
