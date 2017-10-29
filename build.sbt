@@ -48,7 +48,7 @@ libraryDependencies ++= Seq(
   "junit"             %  "junit"            % "4.12"  % Test
 )
 
-fork in Test := true // https://stackoverflow.com/a/23575337/553865
+fork in Test := true // https://stackoverflow.com/a/23575337/553865; forked tests prevents IDEA from attaching a debugger when launching tests via sbt tasks
 
 logLevel := Level.Warn
 
