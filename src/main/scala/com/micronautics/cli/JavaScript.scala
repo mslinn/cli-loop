@@ -64,9 +64,9 @@ class JavaScript(useClassloader: Boolean = true) {
   def eval(string: String): AnyRef =
     try {
       if (scriptEngine==null) scriptEngineOk
-      val value = scriptEngine.eval(string, globalBindings)
-      val value2 = scriptEngine.eval(string, engineBindings)
-      val result: Any = value match {
+      val globalValue = scriptEngine.eval(string, globalBindings)
+      val engineValue = scriptEngine.eval(string, engineBindings)
+      val result: Any = globalValue match {
         case x: java.lang.Boolean => Boolean.unbox(x)
         case x: java.lang.Double  => Double.unbox(x)
         case x: java.lang.Float   => Float.unbox(x)
