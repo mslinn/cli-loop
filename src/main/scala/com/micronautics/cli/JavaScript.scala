@@ -2,9 +2,6 @@ package com.micronautics.cli
 
 import javax.script.{ScriptEngineFactory, ScriptException}
 
-object JavaScript {
-}
-
 /** @param useClassloader set false for unit tests */
 class JavaScript(useClassloader: Boolean = true) {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
@@ -55,12 +52,20 @@ class JavaScript(useClassloader: Boolean = true) {
 
   /** This JavaScript interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
-  def scriptEngine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
+  def scriptEngine: ScriptEngine = {
+    import javax.script._
+
+    val engine = scriptEngineManager.getEngineByName("JavaScript")
+    val bindings = engine.createBindings
+    engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
+    engine
+  }
 
   def eval(string: String): AnyRef =
     try {
       if (scriptEngine==null) scriptEngineOk
-      val value = scriptEngine.eval(string)
+      val value = scriptEngine.eval(string, globalBindings)
+      val value2 = scriptEngine.eval(string, engineBindings)
       val result: Any = value match {
         case x: java.lang.Boolean => Boolean.unbox(x)
         case x: java.lang.Double  => Double.unbox(x)
@@ -82,15 +87,15 @@ class JavaScript(useClassloader: Boolean = true) {
         e
     }
 
-  def get(name: String): AnyRef = scriptEngine.get(name)
+  def get(name: String): AnyRef = globalBindings.get(name)
 
-  def isDefined(name: String): Boolean = bindings.containsKey(name)
+  def isDefined(name: String): Boolean = globalBindings.containsKey(name)
 
   /** All numbers in JavaScript are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
     * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
   def put(name: String, value: AnyVal): AnyRef = {
-    scriptEngine.put(name, value)
-    val retrieved: AnyRef = scriptEngine.get(name)
+    globalBindings.put(name, value)
+    val retrieved: AnyRef = globalBindings.get(name)
     retrieved
   }
 
@@ -111,5 +116,6 @@ class JavaScript(useClassloader: Boolean = true) {
     this
   }
 
-  protected[cli] def bindings: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
+  protected[cli] def engineBindings: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
+  protected[cli] def globalBindings: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
 }

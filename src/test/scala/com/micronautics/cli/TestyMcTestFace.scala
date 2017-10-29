@@ -21,11 +21,11 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
       js.scriptEngine.getFactory.getLanguageName shouldBe "ECMAScript"
 
       js.isDefined("ten")   shouldBe false
-      js.put("ten", 10)
+      js.put("ten", 10)     shouldBe 10.0
       js.get("ten")         shouldBe 10.0
       js.isDefined("ten")   shouldBe true
 
-      js.put("twenty", 20)
+      js.put("twenty", 20)  shouldBe 20.0
       js.get("twenty")      shouldBe 20.0
 
       js.eval("var twelve = ten + 2")
@@ -35,7 +35,7 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
       js.eval("twelve * 2") shouldBe 24.0
       js.get("twelve")      shouldBe 12.0
 
-      js.put("y", 99)
+      js.put("y", 99)       shouldBe 99.0
       js.get("y")           shouldBe 99.0
     }
   }
