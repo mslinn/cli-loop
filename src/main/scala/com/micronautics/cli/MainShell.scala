@@ -1,30 +1,15 @@
 package com.micronautics.cli
 
+import com.micronautics.ethereum._
 import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, UserInterruptException}
-import org.jline.utils.InfoCmp.Capability
-import org.jline.utils.{AttributedStringBuilder, AttributedStyle, InfoCmp}
-import java.util.{HashMap => JHashMap, HashSet => JHashSet, Map => JMap, Set => JSet}
+import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
-object CliLoop extends CliImpl
+object MainShell extends ShellCommands
 
-// Could call `AttributedString.stripAnsi(string)` throughout if no color
-object TerminalCapabilities {
-  val infoCmp: String = InfoCmp.getLoadedInfoCmp("ansi")
-  val stringCapabilities: JHashMap[Capability, String] = new JHashMap
-  val booleanCapabilities: JSet[Capability] = new JHashSet
-  val intCapabilities: JMap[Capability, Integer] = new JHashMap
-
-  InfoCmp.parseInfoCmp(infoCmp, booleanCapabilities, intCapabilities, stringCapabilities)
-  val supportsAnsi: Boolean = stringCapabilities.containsKey(Capability.byName("acsc"))
-}
-
-abstract class CliLoop(promptName: String) {
-  import com.micronautics.cli.CliLoop._
-
-  protected[cli] var mode: Mode
+abstract class MainShell(promptName: String) extends TerminalShell {
 
   protected val reader: LineReader = LineReaderBuilder.builder
-    .terminal(CliLoop.terminal)
+    .terminal(terminal)
     .completer(CommandShell.completer)
     .parser(parser)
     .build
@@ -92,14 +77,14 @@ abstract class CliLoop(promptName: String) {
 
           case _: EndOfFileException =>
             mode match {
-              case Mode.COMMAND =>
+              case EthereumMode.COMMAND =>
                 printRichInfo("\nExiting program.")
                 System.exit(0)
 
-              case Mode.JAVASCRIPT =>
+              case EthereumMode.JAVASCRIPT =>
                 printRichInfo("Returning to command mode.\n")
                 help()
-                mode = Mode.COMMAND
+                mode = EthereumMode.COMMAND
             }
             ""
         }
@@ -113,9 +98,9 @@ abstract class CliLoop(promptName: String) {
 
         if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit"))
           more = false
-        else if (mode==Mode.COMMAND)
+        else if (mode==EthereumMode.COMMAND)
           processCommandLine(line)
-        else if (mode==Mode.JAVASCRIPT)
+        else if (mode==EthereumMode.JAVASCRIPT)
           processJavaScriptLine(line)
       }
     }

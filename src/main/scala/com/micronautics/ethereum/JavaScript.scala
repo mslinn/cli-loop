@@ -1,9 +1,10 @@
-package com.micronautics.cli
+package com.micronautics.ethereum
 
 import javax.script.{ScriptEngineFactory, ScriptException}
+import com.micronautics.cli.TerminalStyles
 
 /** @param useClassloader set false for unit tests */
-class JavaScript(useClassloader: Boolean = true) {
+class JavaScript(useClassloader: Boolean = true) extends TerminalStyles {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
   import scala.collection.JavaConverters._
 
@@ -25,15 +26,15 @@ class JavaScript(useClassloader: Boolean = true) {
           println(s"x=$x")
           x
       }
-      CliLoop.printRichInfo(s"$result\n")
+      printRichInfo(s"$result\n")
       result.asInstanceOf[AnyRef]
     } catch {
       case e: ScriptException =>
-        CliLoop.printRichError(s"Error on line ${ e.getLineNumber }, column ${ e.getColumnNumber}: ${ e.getMessage }")
+        printRichError(s"Error on line ${ e.getLineNumber }, column ${ e.getColumnNumber}: ${ e.getMessage }")
         e
 
       case e: Exception =>
-        CliLoop.printRichError(s"JavaScript.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
+        printRichError(s"JavaScript.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
         e
     }
 
@@ -97,7 +98,7 @@ class JavaScript(useClassloader: Boolean = true) {
       // one day we might need to reload context from a previous session
     } catch {
       case e: Exception =>
-        CliLoop.richError(e.getMessage)
+        richError(e.getMessage)
     }
     this
   }
@@ -119,7 +120,7 @@ class JavaScript(useClassloader: Boolean = true) {
     this
   }
 
-  protected[cli] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
+  protected[ethereum] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
 
-  protected[cli] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
+  protected[ethereum] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
 }

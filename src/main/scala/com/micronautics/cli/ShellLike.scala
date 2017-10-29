@@ -2,14 +2,9 @@ package com.micronautics.cli
 
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.jline.reader.impl.DefaultParser
-import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
-trait CliBase {
-  lazy val parser: DefaultParser = new DefaultParser
-  parser.setEofOnUnclosedQuote(true)
-
+trait ShellLike {
   val commands: List[Any]
 
   protected lazy val cmdMaxWidth: Int = commands.map {
@@ -17,16 +12,9 @@ trait CliBase {
     case (name: String, alias: String) => name.length + alias.length + 1
   }.max
 
-  val defaultStyle: AttributedStyle = AttributedStyle.DEFAULT
-  val errorStyle: AttributedStyle   = AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
-  val helpStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
-  val infoStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA)
-  val jsStyle: AttributedStyle      = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
+  protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
 
-  lazy val terminal: Terminal =
-    TerminalBuilder.builder
-      .system(true)
-      .build
+  def gitBranch: String = gitRepo.getBranch
 
   // todo control whether rich text is output or not based on the value of useColor
   def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)
@@ -70,54 +58,6 @@ trait CliBase {
       .append(", ")
       .style(AttributedStyle.DEFAULT.faintDefault)
   }
-
-  @inline def printRichError(message: String): Unit = terminal.writer.println(richError(message))
-
-  @inline def printRichInfo(message: String): Unit = terminal.writer.println(info(message))
-
-  @inline def printRichHelp(message: String): Unit = terminal.writer.println(help(message))
-
-  @inline def printJsResult(message: String): Unit = terminal.writer.println(js(message))
-
-  def richError(message: String): String = {
-    val asBuilder = new AttributedStringBuilder
-    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(s" Error: $message ")
-    else asBuilder
-           .style(errorStyle)
-           .append(s" Error: $message ")
-           .style(defaultStyle)
-  }.toAnsi
-
-  def help(message: String): String = {
-    val asBuilder = new AttributedStringBuilder
-    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(message)
-    else asBuilder
-           .style(helpStyle)
-           .append(message)
-           .style(defaultStyle)
-  }.toAnsi
-
-  def info(message: String): String = {
-    val asBuilder = new AttributedStringBuilder
-    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(message)
-        else asBuilder
-              .style(infoStyle)
-              .append(message)
-              .style(defaultStyle)
-  }.toAnsi
-
-  def js(message: String): String = {
-    val asBuilder = new AttributedStringBuilder
-    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(message)
-        else asBuilder
-              .style(jsStyle)
-              .append(message)
-              .style(defaultStyle)
-  }.toAnsi
-
-  protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
-
-  def gitBranch: String = gitRepo.getBranch
 
   def helpCmd(name: String, message: String)
              (implicit asBuilder: AttributedStringBuilder): AttributedStringBuilder =

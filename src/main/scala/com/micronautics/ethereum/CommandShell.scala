@@ -1,43 +1,37 @@
-package com.micronautics.cli
+package com.micronautics.ethereum
 
 import java.util.{Map => JMap}
-import com.micronautics.cli.CliLoop.{defaultStyle, helpCmd, helpStyle, printRichError, printRichHelp, printRichInfo, terminal}
+import com.micronautics.cli._
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.LineReaderImpl
 import org.jline.reader.{Binding, LineReader, Macro, ParsedLine, Reference}
-import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.InfoCmp.Capability
 import scala.collection.JavaConverters._
 
-trait CliImpl extends CliBase {
-  // todo how to obtain the following list from the completer?
-  lazy val commands: List[AnyRef] =
-    List("account", "bindkey", ("exit", "^d"), "javascript", ("help", "?"), "password", "set", "testkey", "tput")
+trait ShellCommands extends ShellLike {
 }
 
-object CommandShell extends Completers
+object CommandShell extends Completers {
+  lazy val cNodes: CNodes =
+    CNodes(
+      CNode("account",    helpMessage="Ethereum account management"),
+      CNode("bindkey",    helpMessage="Show all key bindings"),
+      CNode("exit",       helpMessage="Display this message", alias="^d"),
+      CNode("javascript", helpMessage="Enter JavaScript console"),
+      CNode("help",       alias="?"),
+      CNode("password",   helpMessage="Set the password"),
+      CNode("set",        helpMessage=s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'"),
+      CNode("testkey",    helpMessage="Test a key binding"),
+      CNode("tput",       helpMessage="Demonstrate a terminal capability, such as 'bell'")
+    )
+}
 
-class CommandShell extends CliLoop("beth") {
-  var mode: Mode = Mode.COMMAND
-
-  protected def fullHelp(): Unit = {
-
-    /** This implicit acts as a local accumulator for the rich help message */
-    implicit val asb: AttributedStringBuilder = new AttributedStringBuilder().append("\n")
-
-    if (TerminalCapabilities.supportsAnsi) asb.style(helpStyle)
-
-    helpCmd("account",     "Ethereum account management")
-    helpCmd("bindkey",     "Show all key bindings")
-    helpCmd("javascript",  "Enter JavaScript console")
-    helpCmd("help", "?",   "Display this message")
-    helpCmd("set",        s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'")
-    helpCmd("testkey",     "Test a key binding")
-    helpCmd("tput",        "Demonstrate a terminal capability, such as 'bell'")
-
-    if (TerminalCapabilities.supportsAnsi) asb.style(defaultStyle)
-    terminal.writer.println(asb.toAnsi)
-  }
+class CommandShell extends ShellContext(
+  prompt = "beth",
+  commandNodes = CNodes(),
+  topHelpMessage = ""
+) {
+  import MainShell._
 
   protected def processCommandLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
@@ -47,7 +41,7 @@ class CommandShell extends CliLoop("beth") {
       case "bindkey" => bindKey(parsedLine)
 
       case "javascript" =>
-        mode = Mode.JAVASCRIPT
+        mode = EthereumMode.JAVASCRIPT
         printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.\n")
 
       case "help" | "?" =>

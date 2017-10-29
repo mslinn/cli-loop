@@ -1,6 +1,10 @@
-import com.micronautics.cli.CommandShell
+import com.micronautics.cli.ShellManager
+import com.micronautics.ethereum.CommandShell
 
 object Main extends App {
-  new CommandShell().run()
+  val commandShell = new CommandShell
+
+  val shellManager = new ShellManager
+  shellManager.push(commandShell)
 }
 

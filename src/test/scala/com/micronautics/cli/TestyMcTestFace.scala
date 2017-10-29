@@ -1,6 +1,7 @@
 package com.micronautics.cli
 
 import javax.script.{Bindings, ScriptEngineFactory}
+import com.micronautics.ethereum.JavaScript
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest._
