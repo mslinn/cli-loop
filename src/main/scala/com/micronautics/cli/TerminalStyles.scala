@@ -3,12 +3,17 @@ package com.micronautics.cli
 import org.jline.terminal.Terminal
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
+object TerminalStyles {
+  val defaultStyle: AttributedStyle   = AttributedStyle.DEFAULT
+  val errorStyle: AttributedStyle     = defaultStyle.foreground(AttributedStyle.RED)
+  val helpStyle: AttributedStyle      = defaultStyle.foreground(AttributedStyle.CYAN)
+  val helpCNameStyle: AttributedStyle = helpStyle.bold
+  val infoStyle: AttributedStyle      = defaultStyle.foreground(AttributedStyle.MAGENTA)
+  val jsStyle: AttributedStyle        = defaultStyle.foreground(AttributedStyle.CYAN)
+}
+
 trait TerminalStyles {
-  val defaultStyle: AttributedStyle = AttributedStyle.DEFAULT
-  val errorStyle: AttributedStyle   = AttributedStyle.DEFAULT.foreground(AttributedStyle.RED)
-  val helpStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
-  val infoStyle: AttributedStyle    = AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA)
-  val jsStyle: AttributedStyle      = AttributedStyle.DEFAULT.foreground(AttributedStyle.CYAN)
+  import TerminalStyles._
 
   @inline def printRichError(message: String)
                             (implicit terminal: Terminal): Unit =

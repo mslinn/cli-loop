@@ -1,5 +1,6 @@
 package com.micronautics.cli
 
+import com.micronautics.cli.TerminalStyles._
 import org.jline.builtins.Completers.TreeCompleter
 import org.jline.builtins.Completers.TreeCompleter.{Node, node}
 import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter}
@@ -70,7 +71,7 @@ case class CNodes(cNodes: CNode*) {
     } yield {
       if (TerminalCapabilities.supportsAnsi) {
         new AttributedStringBuilder().append("\n")
-          .style(helpBoldStyle)
+          .style(helpCNameStyle)
           .append(paddedName)
           .style(defaultStyle)
           .append(" - ")
