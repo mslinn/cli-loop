@@ -1,13 +1,13 @@
 package com.micronautics.cli
 
-import collection.JavaConverters._
-import com.micronautics.cli.CliLoop.{defaultStyle, helpCmd, helpStyle, printRichError, printRichHelp, printRichInfo, terminal}
 import java.util.{Map => JMap}
+import com.micronautics.cli.CliLoop.{defaultStyle, helpCmd, helpStyle, printRichError, printRichHelp, printRichInfo, terminal}
 import org.jline.keymap.KeyMap
-import org.jline.reader.{Binding, LineReader, Macro, ParsedLine, Reference}
 import org.jline.reader.impl.LineReaderImpl
+import org.jline.reader.{Binding, LineReader, Macro, ParsedLine, Reference}
 import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.InfoCmp.Capability
+import scala.collection.JavaConverters._
 
 trait CliImpl extends CliBase {
   // todo how to obtain the following list from the completer?

@@ -1,5 +1,6 @@
 package com.micronautics.cli
 
+import javax.script.{Bindings, ScriptEngineFactory}
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -7,15 +8,22 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TestyMcTestFace extends WordSpec with MustMatchers {
-  val js = new JavaScript
+  val js = new JavaScript(useClassloader = false)
 
   "JavaScript" should {
     "work" in {
+      js.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = js.scriptEngineFactories
+      engineFactories.size should be > 0
+
+      js.showEngineFactories(engineFactories)
+      js.scriptEngine should not be null
+      js.scriptEngine.getFactory.getLanguageName shouldBe "ECMAScript"
+
       js.isDefined("ten")   shouldBe false
       js.put("ten", 10)
+      js.get("ten")         shouldBe 10.0
       js.isDefined("ten")   shouldBe true
-      js.get("ten")         shouldBe 10.0
-      js.get("ten")         shouldBe 10.0
 
       js.put("twenty", 20)
       js.get("twenty")      shouldBe 20.0

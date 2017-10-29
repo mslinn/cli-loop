@@ -48,9 +48,6 @@ libraryDependencies ++= Seq(
   "junit"             %  "junit"       % "4.12"  % Test
 )
 
-// Nashorn is not found unless tests fork, but that means IDEA cannot debug tests launched from an SBT task
-fork in Test := true
-
 logLevel := Level.Warn
 
 // Only show warnings and errors on the screen for compilations.

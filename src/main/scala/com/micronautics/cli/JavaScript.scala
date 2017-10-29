@@ -1,16 +1,26 @@
 package com.micronautics.cli
 
-import javax.script.ScriptException
+import javax.script.{ScriptEngineFactory, ScriptException}
 
 object JavaScript {
 }
 
-class JavaScript {
+/** @param useClassloader set false for unit tests */
+class JavaScript(useClassloader: Boolean = true) {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
-  import collection.JavaConverters._
-  import CliLoop.terminal.{writer => TWriter}
+  import scala.collection.JavaConverters._
 
-  protected lazy val scriptEngineManager = new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
+  protected lazy val scriptEngineManager: ScriptEngineManager =
+    if (useClassloader) new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
+    else new ScriptEngineManager()
+
+  def scriptEngineOk: Boolean = {
+    if (scriptEngineManager==null) {
+      Console.err.println("\nError: scriptEngineManager is null!")
+      System.exit(0)
+    }
+    scriptEngineManager.getEngineFactories.size>0
+  }
 
   /* Sample output:
       2 scripting engines are available.
@@ -25,22 +35,23 @@ class JavaScript {
       Language Name = ECMAScript
       Language Version = ECMA - 262 Edition 5.1
       Names = nashorn, Nashorn, js, JS, JavaScript, javascript, ECMAScript, ecmascript */
-  protected def checkScriptEngine(): Unit = {
-    if (scriptEngineManager==null) {
-      Console.err.println("\nError: scriptEngineManager is null!")
-      System.exit(0)
+  def scriptEngineFactories: List[ScriptEngineFactory] = {
+    scriptEngineOk
+    println(scriptEngineManager.getEngineFactories.size + " scripting engines are available.")
+    scriptEngineManager.getEngineFactories.asScala.toList
+  }
+
+  def showEngineFactories(engineFactories: List[ScriptEngineFactory]): Unit =
+    engineFactories.foreach { engine =>
+      println(
+        s"""Engine name = ${ engine.getEngineName }
+           |Engine version = ${ engine.getEngineVersion }
+           |Language name = ${ engine.getLanguageName }
+           |Language version = ${ engine.getLanguageVersion }
+           |Names that can be used to retrieve this engine = ${ engine.getNames.asScala.mkString(", ") }
+           |""".stripMargin)
     }
 
-    TWriter.println(scriptEngineManager.getEngineFactories.size + " scripting engines are available.")
-    scriptEngineManager.getEngineFactories.asScala.foreach { engine =>
-      TWriter.println(s"""Engine Name = ${ engine.getEngineName }
-                                         |Engine Version = ${ engine.getEngineVersion }
-                                         |Language Name = ${ engine.getLanguageName }
-                                         |Language Version = ${ engine.getLanguageVersion }
-                                         |Names = ${ engine.getNames.asScala.mkString(", ") }
-                                         |""".stripMargin)
-    }
-  }
 
   /** This JavaScript interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
@@ -48,7 +59,7 @@ class JavaScript {
 
   def eval(string: String): AnyRef =
     try {
-      if (scriptEngine==null) checkScriptEngine()
+      if (scriptEngine==null) scriptEngineOk
       val value = scriptEngine.eval(string)
       val result: Any = value match {
         case x: java.lang.Boolean => Boolean.unbox(x)
@@ -79,7 +90,8 @@ class JavaScript {
     * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
   def put(name: String, value: AnyVal): AnyRef = {
     scriptEngine.put(name, value)
-    get(name)
+    val retrieved: AnyRef = scriptEngine.get(name)
+    retrieved
   }
 
   /** Initialize JavaScript instance */
