@@ -11,12 +11,53 @@ class JavaScript(useClassloader: Boolean = true) {
     if (useClassloader) new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
     else new ScriptEngineManager()
 
-  def scriptEngineOk: Boolean = {
-    if (scriptEngineManager==null) {
-      Console.err.println("\nError: scriptEngineManager is null!")
-      System.exit(0)
+  def eval(string: String): AnyRef =
+    try {
+      if (scriptEngine==null) scriptEngineOk
+      val globalValue = scriptEngine.eval(string, bindingsGlobal)
+      val engineValue = scriptEngine.eval(string, bindingsEngine)
+      val result = globalValue match {
+        case x: java.lang.Boolean => Boolean.unbox(x)
+        case x: java.lang.Double  => Double.unbox(x)
+        case x: java.lang.Float   => Float.unbox(x)
+        case x: java.lang.Integer => Int.unbox(x)
+        case x =>
+          println(s"x=$x")
+          x
+      }
+      CliLoop.printRichInfo(s"$result\n")
+      result.asInstanceOf[AnyRef]
+    } catch {
+      case e: ScriptException =>
+        CliLoop.printRichError(s"Error on line ${ e.getLineNumber }, column ${ e.getColumnNumber}: ${ e.getMessage }")
+        e
+
+      case e: Exception =>
+        CliLoop.printRichError(s"JavaScript.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
+        e
     }
-    scriptEngineManager.getEngineFactories.size>0
+
+  def get(name: String): AnyRef = bindingsGlobal.get(name)
+
+  def isDefined(name: String): Boolean = bindingsGlobal.containsKey(name)
+
+  /** All numbers in JavaScript are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
+    * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
+  def put(name: String, value: AnyVal): AnyRef = {
+    bindingsGlobal.put(name, value)
+    val retrieved: AnyRef = bindingsGlobal.get(name)
+    retrieved
+  }
+
+  /** This JavaScript interpreter maintains state throughout the life of the program.
+    * Multiple eval() invocations accumulate state. */
+  def scriptEngine: ScriptEngine = {
+    import javax.script._
+
+    val engine = scriptEngineManager.getEngineByName("JavaScript")
+    val bindings = engine.createBindings
+    engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
+    engine
   }
 
   /* Sample output:
@@ -38,66 +79,17 @@ class JavaScript(useClassloader: Boolean = true) {
     scriptEngineManager.getEngineFactories.asScala.toList
   }
 
-  def showEngineFactories(engineFactories: List[ScriptEngineFactory]): Unit =
-    engineFactories.foreach { engine =>
-      println(
-        s"""Engine name = ${ engine.getEngineName }
-           |Engine version = ${ engine.getEngineVersion }
-           |Language name = ${ engine.getLanguageName }
-           |Language version = ${ engine.getLanguageVersion }
-           |Names that can be used to retrieve this engine = ${ engine.getNames.asScala.mkString(", ") }
-           |""".stripMargin)
+  def scriptEngineOk: Boolean = {
+    if (scriptEngineManager==null) {
+      Console.err.println("\nError: scriptEngineManager is null!")
+      System.exit(0)
     }
-
-
-  /** This JavaScript interpreter maintains state throughout the life of the program.
-    * Multiple eval() invocations accumulate state. */
-  def scriptEngine: ScriptEngine = {
-    import javax.script._
-
-    val engine = scriptEngineManager.getEngineByName("JavaScript")
-    val bindings = engine.createBindings
-    engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-    engine
+    scriptEngineManager.getEngineFactories.size>0
   }
 
-  def eval(string: String): AnyRef =
-    try {
-      if (scriptEngine==null) scriptEngineOk
-      val globalValue = scriptEngine.eval(string, globalBindings)
-      val engineValue = scriptEngine.eval(string, engineBindings)
-      val result: Any = globalValue match {
-        case x: java.lang.Boolean => Boolean.unbox(x)
-        case x: java.lang.Double  => Double.unbox(x)
-        case x: java.lang.Float   => Float.unbox(x)
-        case x: java.lang.Integer => Int.unbox(x)
-        case x =>
-          println(s"x=$x")
-          x
-      }
-      CliLoop.printRichInfo(s"$result\n")
-      result.asInstanceOf[AnyRef]
-    } catch {
-      case e: ScriptException =>
-        CliLoop.printRichError(s"Error on line ${ e.getLineNumber }, column ${ e.getColumnNumber}: ${ e.getMessage }")
-        e
+  def scopeKeysEngine: Set[String] = bindingsEngine.keySet.asScala.toSet
 
-      case e: Exception =>
-        CliLoop.printRichError(s"JavaScript.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
-        e
-    }
-
-  def get(name: String): AnyRef = globalBindings.get(name)
-
-  def isDefined(name: String): Boolean = globalBindings.containsKey(name)
-
-  /** All numbers in JavaScript are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
-    * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
-  def put(name: String, value: AnyVal): AnyRef = {
-    globalBindings.put(name, value)
-    val retrieved: AnyRef = globalBindings.get(name)
-    retrieved
-  }
+  def scopeKeysGlobal: Set[String] = bindingsGlobal.keySet.asScala.toSet
 
   /** Initialize JavaScript instance */
   def setup(): JavaScript = {
@@ -110,12 +102,24 @@ class JavaScript(useClassloader: Boolean = true) {
     this
   }
 
-  def show(expression: String): JavaScript = {
+  def showEngineFactories(engineFactories: List[ScriptEngineFactory]): Unit =
+    engineFactories.foreach { engine =>
+      println(
+        s"""Engine name = ${ engine.getEngineName }
+           |Engine version = ${ engine.getEngineVersion }
+           |Language name = ${ engine.getLanguageName }
+           |Language version = ${ engine.getLanguageVersion }
+           |Names that can be used to retrieve this engine = ${ engine.getNames.asScala.mkString(", ") }
+           |""".stripMargin)
+    }
+
+  def showEvaluation(expression: String): JavaScript = {
     val result: AnyRef = eval(expression)
     println(s"$expression => $result")
     this
   }
 
-  protected[cli] def engineBindings: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
-  protected[cli] def globalBindings: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
+  protected[cli] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
+
+  protected[cli] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
 }
