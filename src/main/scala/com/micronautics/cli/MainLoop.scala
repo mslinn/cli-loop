@@ -34,10 +34,10 @@ object MainLoop {
   lazy val mainLoop: MainLoop = new MainLoop
 
   lazy val ethereumEvaluator: Evaluator = new EthereumEvaluator().setup()
-  lazy val ethereumShell: EthereumShell = new EthereumShell()
+  lazy val ethereumShell: EthereumShell = new EthereumShell
 
-  lazy val jsEvaluator: Evaluator = new JavaScriptEvaluator().setup()
-  lazy val jsShell: JavaScriptShell = new JavaScriptShell()
+  lazy val jsEvaluator: Evaluator   = new JavaScriptEvaluator().setup()
+  lazy val jsShell: JavaScriptShell = new JavaScriptShell
 
   private var _activeShell: Shell = ethereumShell
 
