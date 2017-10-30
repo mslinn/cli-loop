@@ -1,18 +1,32 @@
-package com.micronautics.ethereum
+package com.micronautics.evaluator
 
 import javax.script.{ScriptEngineFactory, ScriptException}
-import com.micronautics.cli.TerminalStyles
 
-/** @param useClassloader set false for unit tests */
-class JavaScript(useClassloader: Boolean = true) extends TerminalStyles {
+/** @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
+class JavaScript(useClassloader: Boolean = true) extends Evaluator {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
+  import com.micronautics.cli.TerminalStyles._
   import scala.collection.JavaConverters._
 
   protected lazy val scriptEngineManager: ScriptEngineManager =
-    if (useClassloader) new ScriptEngineManager(getClass.getClassLoader) // https://github.com/sbt/sbt/issues/1214
+    if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
     else new ScriptEngineManager()
 
-  def eval(string: String): AnyRef =
+  lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
+
+  protected var linesInput: Int = 0
+  protected var lastErrorInputLine: Option[Int] = None
+  protected var lastErrorMessage: Option[String] = None
+
+
+  def init(): EvaluatorInfo = {
+    // todo reload previous session context somehow
+
+    info
+  }
+
+  /** User input is passed to the `JavaScript` `EvaluatorLike` subclass */
+  def input(string: String): AnyRef =
     try {
       if (scriptEngine==null) scriptEngineOk
       val globalValue = scriptEngine.eval(string, bindingsGlobal)
@@ -55,25 +69,12 @@ class JavaScript(useClassloader: Boolean = true) extends TerminalStyles {
   def scriptEngine: ScriptEngine = {
     import javax.script._
 
-    val engine = scriptEngineManager.getEngineByName("JavaScript")
-    val bindings = engine.createBindings
+    val engine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
+    val bindings: Bindings = engine.createBindings
     engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
     engine
   }
 
-  /* Sample output:
-      2 scripting engines are available.
-      Engine Name = Scala REPL
-      Engine Version = 2.0
-      Language Name = Scala
-      Language Version = version 2.12.4
-      Names = scala
-
-      Engine Name = Oracle Nashorn
-      Engine Version = 1.8.0_151
-      Language Name = ECMAScript
-      Language Version = ECMA - 262 Edition 5.1
-      Names = nashorn, Nashorn, js, JS, JavaScript, javascript, ECMAScript, ecmascript */
   def scriptEngineFactories: List[ScriptEngineFactory] = {
     scriptEngineOk
     println(scriptEngineManager.getEngineFactories.size + " scripting engines are available.")
@@ -95,7 +96,7 @@ class JavaScript(useClassloader: Boolean = true) extends TerminalStyles {
   /** Initialize JavaScript instance */
   def setup(): JavaScript = {
     try {
-      // one day we might need to reload context from a previous session
+      // todo reload context from a previous session
     } catch {
       case e: Exception =>
         richError(e.getMessage)
@@ -103,24 +104,61 @@ class JavaScript(useClassloader: Boolean = true) extends TerminalStyles {
     this
   }
 
+  /* Sample output for Windows (Linux does not show the Scala REPL):
+      2 scripting engines are available.
+      Engine Name      = Scala REPL
+      Engine Version   = 2.0
+      Language Name    = Scala
+      Language Version = version 2.12.4
+      Names = scala
+
+      Engine Name      = Oracle Nashorn
+      Engine Version   = 1.8.0_151
+      Language Name    = ECMAScript
+      Language Version = ECMA - 262 Edition 5.1
+      Names = nashorn, Nashorn, js, JS, JavaScript, javascript, ECMAScript, ecmascript */
   def showEngineFactories(engineFactories: List[ScriptEngineFactory]): Unit =
     engineFactories.foreach { engine =>
       println(
-        s"""Engine name = ${ engine.getEngineName }
-           |Engine version = ${ engine.getEngineVersion }
-           |Language name = ${ engine.getLanguageName }
+        s"""Engine name      = ${ engine.getEngineName }
+           |Engine version   = ${ engine.getEngineVersion }
+           |Language name    = ${ engine.getLanguageName }
            |Language version = ${ engine.getLanguageVersion }
            |Names that can be used to retrieve this engine = ${ engine.getNames.asScala.mkString(", ") }
            |""".stripMargin)
     }
 
   def showEvaluation(expression: String): JavaScript = {
-    val result: AnyRef = eval(expression)
+    val result: AnyRef = input(expression)
     println(s"$expression => $result")
     this
   }
 
+  def shutdown(): EvaluatorStatus = {
+    // todo save session context somehow
+
+    EvaluatorStatus(
+      linesInput = linesInput,
+      lastErrorInputLine = lastErrorInputLine,
+      lastErrorMessage = lastErrorMessage
+    )
+  }
+
+  def status = EvaluatorStatus(
+    linesInput = linesInput,
+    lastErrorInputLine = lastErrorInputLine,
+    lastErrorMessage = lastErrorMessage
+  )
+
   protected[ethereum] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
 
   protected[ethereum] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
+
+  protected def info = EvaluatorInfo(
+    engineName = factory.getEngineName,
+    engineVersion = factory.getEngineVersion,
+    evaluatorName = factory.getLanguageName,
+    evaluatorVersion = s"${ factory.getLanguageVersion } | Micronautics v0.1.0",
+    names = factory.getNames.asScala.toList
+  )
 }

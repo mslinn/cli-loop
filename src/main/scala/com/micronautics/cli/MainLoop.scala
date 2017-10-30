@@ -1,16 +1,15 @@
 package com.micronautics.cli
 
 import com.micronautics.ethereum._
+import com.micronautics.evaluator.JavaScript
 import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, UserInterruptException}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
-object MainShell extends ShellCommands
-
-abstract class MainShell(promptName: String) extends TerminalShell {
+abstract class MainLoop extends TerminalShell {
 
   protected val reader: LineReader = LineReaderBuilder.builder
     .terminal(terminal)
-    .completer(CommandShell.completer)
+    .completer(shell.cNodes.completer)
     .parser(parser)
     .build
   // If the user's first keypress is a tab, all of the top-level node values are displayed, thereby displaying the available commands

@@ -26,12 +26,12 @@ object CommandShell extends Completers {
     )
 }
 
-class CommandShell extends ShellContext(
+class CommandShell extends Shell(
   prompt = "beth",
   commandNodes = CNodes(),
   topHelpMessage = ""
 ) {
-  import MainShell._
+  import TerminalStyles._
 
   protected def processCommandLine(line: String): Unit = {
     val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
@@ -41,7 +41,8 @@ class CommandShell extends ShellContext(
       case "bindkey" => bindKey(parsedLine)
 
       case "javascript" =>
-        mode = EthereumMode.JAVASCRIPT
+        shellStack.push(javaScript)    // new order
+        // mode = EthereumMode.JAVASCRIPT // old order
         printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.\n")
 
       case "help" | "?" =>

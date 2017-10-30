@@ -7,22 +7,22 @@ object ShellStack {
 }
 
 class ShellStack {
-  protected[cli] lazy val stack: mutable.Buffer[ShellLike] = mutable.Buffer.empty
+  protected[cli] lazy val stack: mutable.Buffer[Shell] = mutable.Buffer.empty
 
   def isEmpty: Boolean = stack.isEmpty
 
   def nonEmpty: Boolean = stack.nonEmpty
 
-  def pop(shell: ShellLike): (ShellLike, ShellStack) = {
+  def pop(shell: Shell): (Shell, ShellStack) = {
     val result = stack.head
     stack.remove(0)
     (result, this)
   }
 
-  def push(shell: ShellLike): ShellStack = {
+  def push(shell: Shell): ShellStack = {
     stack.insert(0, shell)
     this
   }
 
-  def top: ShellLike = stack.head
+  def top: Shell = stack.head
 }

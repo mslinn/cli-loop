@@ -10,10 +10,6 @@ object TerminalStyles {
   val helpCNameStyle: AttributedStyle = helpStyle.bold
   val infoStyle: AttributedStyle      = defaultStyle.foreground(AttributedStyle.MAGENTA)
   val jsStyle: AttributedStyle        = defaultStyle.foreground(AttributedStyle.CYAN)
-}
-
-trait TerminalStyles {
-  import TerminalStyles._
 
   @inline def printRichError(message: String)
                             (implicit terminal: Terminal): Unit =

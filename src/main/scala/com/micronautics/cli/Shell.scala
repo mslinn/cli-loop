@@ -1,10 +1,13 @@
 package com.micronautics.cli
 
+import com.micronautics.evaluator.Evaluator
+
 /** Contains properties that define shell instances, for example the prompt, help message,
   * maximum command verb length, and a Map of function name to function for each command */
-case class ShellContext(
+case class Shell(
   prompt: String,
   commandNodes: CNodes,
+  evaluator: Evaluator,
   topHelpMessage: String = ""
 ) {
   lazy val commandFunctions: Map[String, Any => Any] =

@@ -1,6 +1,5 @@
 package com.micronautics.ethereum
 
-import java.util.{List => JList}
 import org.jline.builtins.Completers.TreeCompleter.{Node, node}
 
 trait Completers {
