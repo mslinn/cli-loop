@@ -1,6 +1,11 @@
 package com.micronautics.cli
 
-class ShellManager {
-  protected[cli] lazy val shellStack: ShellStack = ShellStack.empty
+object ShellManager {
+  lazy val instance = new ShellManager
 
+  def shellStack: ShellStack = instance.shellStack
+}
+
+class ShellManager {
+  lazy val shellStack: ShellStack = ShellStack.empty
 }

@@ -9,6 +9,8 @@ trait Evaluator {
     * @return result from evaluator */
   def input(text: String): AnyRef
 
+  def setup(): Evaluator
+
   def shutdown(): EvaluatorStatus
 
   /** Evaluator status query */

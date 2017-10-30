@@ -60,7 +60,7 @@ logLevel in compile := Level.Warn
 logLevel in test := Level.Info
 
 // define the statements initially evaluated when entering 'console', 'console-quick', but not 'console-project'
-initialCommands in console := """val js: com.micronautics.cli.JavaScript = new com.micronautics.cli.JavaScript()
+initialCommands in console := """val js: com.micronautics.cli.JavaScriptEvaluator = new com.micronautics.cli.JavaScriptEvaluator()
                                 |js.eval("var x = 1")
                                 |js.show("x")
                                 |js.show("x = x + 1")

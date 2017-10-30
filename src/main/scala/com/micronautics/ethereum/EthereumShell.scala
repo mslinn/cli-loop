@@ -11,13 +11,13 @@ import scala.collection.JavaConverters._
 trait ShellCommands extends ShellLike {
 }
 
-object CommandShell extends Completers {
+object EthereumShell extends Completers {
   lazy val cNodes: CNodes =
     CNodes(
       CNode("account",    helpMessage="Ethereum account management"),
       CNode("bindkey",    helpMessage="Show all key bindings"),
       CNode("exit",       helpMessage="Display this message", alias="^d"),
-      CNode("javascript", helpMessage="Enter JavaScript console"),
+      CNode("javascript", helpMessage="Enter JavaScriptEvaluator console"),
       CNode("help",       alias="?"),
       CNode("password",   helpMessage="Set the password"),
       CNode("set",        helpMessage=s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'"),
@@ -26,24 +26,26 @@ object CommandShell extends Completers {
     )
 }
 
-class CommandShell extends Shell(
+class EthereumShell extends Shell(
   prompt = "beth",
-  commandNodes = CNodes(),
+  cNodes = CNodes(),
+  evaluator = MainLoop.ethereumEvaluator,
   topHelpMessage = ""
 ) {
   import TerminalStyles._
+  import MainLoop._
 
   protected def processCommandLine(line: String): Unit = {
-    val parsedLine: ParsedLine = reader.getParser.parse(line, 0)
+    val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
     parsedLine.word match {
       case "account" => account(parsedLine)
 
       case "bindkey" => bindKey(parsedLine)
 
       case "javascript" =>
-        shellStack.push(javaScript)    // new order
+        Main.shellManager.shellStack.push(jsShell)    // new order
         // mode = EthereumMode.JAVASCRIPT // old order
-        printRichInfo("Entering JavaScript mode. Press Control-d to return to command mode.\n")
+        printRichInfo("Entering JavaScriptEvaluator mode. Press Control-d to return to command mode.\n")
 
       case "help" | "?" =>
         terminal.writer.println()
@@ -65,7 +67,7 @@ class CommandShell extends Shell(
     }
   }
 
-  protected def processJavaScriptLine(line: String): AnyRef = javaScript.eval(line)
+  protected def processJavaScriptLine(line: String): AnyRef = jsEvaluator.input(line)
 
   def signInMessage(): Unit = printRichHelp("Press <tab> multiple times for tab completion of commands and options.\n")
 

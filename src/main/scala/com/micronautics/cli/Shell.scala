@@ -6,19 +6,19 @@ import com.micronautics.evaluator.Evaluator
   * maximum command verb length, and a Map of function name to function for each command */
 case class Shell(
   prompt: String,
-  commandNodes: CNodes,
+  cNodes: CNodes,
   evaluator: Evaluator,
   topHelpMessage: String = ""
 ) {
   lazy val commandFunctions: Map[String, Any => Any] =
-    commandNodes.cNodes.map {
+    cNodes.cNodes.map {
       case CNode(name, function, _, _, _) => (name, function)
     }.toMap
 
   def functionFor(name: String): Option[Any => Any] = commandFunctions.get(name)
 
   lazy val commandHelps: Map[String, String] =
-    commandNodes
+    cNodes
       .cNodes
       .sortBy(_.name)
       .map { case CNode(name, _, helpMessage, _, _) => (name, helpMessage) }

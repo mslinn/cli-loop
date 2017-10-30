@@ -13,7 +13,7 @@ class ShellStack {
 
   def nonEmpty: Boolean = stack.nonEmpty
 
-  def pop(shell: Shell): (Shell, ShellStack) = {
+  def pop(): (Shell, ShellStack) = {
     val result = stack.head
     stack.remove(0)
     (result, this)

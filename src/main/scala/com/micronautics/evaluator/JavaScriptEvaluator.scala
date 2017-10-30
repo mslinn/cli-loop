@@ -3,7 +3,7 @@ package com.micronautics.evaluator
 import javax.script.{ScriptEngineFactory, ScriptException}
 
 /** @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
-class JavaScript(useClassloader: Boolean = true) extends Evaluator {
+class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
   import com.micronautics.cli.TerminalStyles._
   import scala.collection.JavaConverters._
@@ -25,7 +25,7 @@ class JavaScript(useClassloader: Boolean = true) extends Evaluator {
     info
   }
 
-  /** User input is passed to the `JavaScript` `EvaluatorLike` subclass */
+  /** User input is passed to the `JavaScriptEvaluator` `EvaluatorLike` subclass */
   def input(string: String): AnyRef =
     try {
       if (scriptEngine==null) scriptEngineOk
@@ -48,7 +48,7 @@ class JavaScript(useClassloader: Boolean = true) extends Evaluator {
         e
 
       case e: Exception =>
-        printRichError(s"JavaScript.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
+        printRichError(s"JavaScriptEvaluator.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
         e
     }
 
@@ -56,20 +56,20 @@ class JavaScript(useClassloader: Boolean = true) extends Evaluator {
 
   def isDefined(name: String): Boolean = bindingsGlobal.containsKey(name)
 
-  /** All numbers in JavaScript are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
-    * JavaScript does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
+  /** All numbers in JavaScriptEvaluator are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
+    * JavaScriptEvaluator does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
   def put(name: String, value: AnyVal): AnyRef = {
     bindingsGlobal.put(name, value)
     val retrieved: AnyRef = bindingsGlobal.get(name)
     retrieved
   }
 
-  /** This JavaScript interpreter maintains state throughout the life of the program.
+  /** This JavaScriptEvaluator interpreter maintains state throughout the life of the program.
     * Multiple eval() invocations accumulate state. */
   def scriptEngine: ScriptEngine = {
     import javax.script._
 
-    val engine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScript")
+    val engine: ScriptEngine = scriptEngineManager.getEngineByName("JavaScriptEvaluator")
     val bindings: Bindings = engine.createBindings
     engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
     engine
@@ -93,8 +93,8 @@ class JavaScript(useClassloader: Boolean = true) extends Evaluator {
 
   def scopeKeysGlobal: Set[String] = bindingsGlobal.keySet.asScala.toSet
 
-  /** Initialize JavaScript instance */
-  def setup(): JavaScript = {
+  /** Initialize JavaScriptEvaluator instance */
+  def setup() = {
     try {
       // todo reload context from a previous session
     } catch {
@@ -116,7 +116,7 @@ class JavaScript(useClassloader: Boolean = true) extends Evaluator {
       Engine Version   = 1.8.0_151
       Language Name    = ECMAScript
       Language Version = ECMA - 262 Edition 5.1
-      Names = nashorn, Nashorn, js, JS, JavaScript, javascript, ECMAScript, ecmascript */
+      Names = nashorn, Nashorn, js, JS, JavaScriptEvaluator, javascript, ECMAScript, ecmascript */
   def showEngineFactories(engineFactories: List[ScriptEngineFactory]): Unit =
     engineFactories.foreach { engine =>
       println(
@@ -128,7 +128,7 @@ class JavaScript(useClassloader: Boolean = true) extends Evaluator {
            |""".stripMargin)
     }
 
-  def showEvaluation(expression: String): JavaScript = {
+  def showEvaluation(expression: String): JavaScriptEvaluator = {
     val result: AnyRef = input(expression)
     println(s"$expression => $result")
     this

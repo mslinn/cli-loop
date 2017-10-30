@@ -1,22 +1,57 @@
 package com.micronautics.cli
 
 import com.micronautics.ethereum._
-import com.micronautics.evaluator.JavaScript
-import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, UserInterruptException}
+import com.micronautics.evaluator.{EthereumEvaluator, JavaScriptEvaluator}
+import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, Parser, UserInterruptException}
+import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
+import TerminalStyles._
+import org.jline.reader.impl.DefaultParser
 
-abstract class MainLoop extends TerminalShell {
+object MainLoop {
+  implicit lazy val parser: DefaultParser = new DefaultParser
+  parser.setEofOnUnclosedQuote(true)
 
-  protected val reader: LineReader = LineReaderBuilder.builder
-    .terminal(terminal)
-    .completer(shell.cNodes.completer)
-    .parser(parser)
-    .build
-  // If the user's first keypress is a tab, all of the top-level node values are displayed, thereby displaying the available commands
-  reader.unsetOpt(LineReader.Option.INSERT_TAB)
+  implicit lazy val terminal: Terminal =
+    TerminalBuilder.builder
+      .system(true)
+      .build
 
-  protected lazy val javaScript: JavaScript = new JavaScript().setup()
+  lazy val mainLoop: MainLoop = new MainLoop
 
+  lazy val ethereumEvaluator: EthereumEvaluator = new EthereumEvaluator().setup()
+  lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
+
+  lazy val ethereumShell: EthereumShell = new EthereumShell()
+  lazy val jsShell: EthereumShell = new JavaScriptShell()
+
+  private var _activeShell: Shell = ethereumShell
+
+  def activeShell: Shell = _activeShell
+
+  def activeShell_= (newValue: Shell): Unit = {
+    _activeShell = newValue
+    mainLoop.reader = reader(parser, terminal)
+  }
+
+  // todo should this be cached, and recomputed whenever `activeShell` changes?
+  protected def reader(parser: Parser, terminal: Terminal): LineReader = {
+    val x = LineReaderBuilder.builder
+      .terminal(terminal)
+      .completer(activeShell.cNodes.completer)
+      .parser(parser)
+      .build
+
+    // If the user's first keypress is a tab, all of the top-level node values are displayed, thereby displaying the available commands
+    x.unsetOpt(LineReader.Option.INSERT_TAB)
+    x
+  }
+}
+
+class MainLoop extends ShellLike {
+  import MainLoop._
+
+  var reader: LineReader = MainLoop.reader(parser, terminal)
 
   def run(): Unit = {
     help()
@@ -31,7 +66,7 @@ abstract class MainLoop extends TerminalShell {
 
   protected def processJavaScriptLine(line: String): AnyRef
 
-  def signInMessage(): Unit
+  protected def signInMessage(): Unit
 
 
   // todo add parameters for helpCmd name/value tuples/triples
@@ -75,15 +110,14 @@ abstract class MainLoop extends TerminalShell {
             ""
 
           case _: EndOfFileException =>
-            mode match {
-              case EthereumMode.COMMAND =>
+            val (nextShell, shellStack) = ShellManager.shellStack.pop()
+            if (shellStack.isEmpty) {
                 printRichInfo("\nExiting program.")
                 System.exit(0)
-
-              case EthereumMode.JAVASCRIPT =>
-                printRichInfo("Returning to command mode.\n")
-                help()
-                mode = EthereumMode.COMMAND
+            } else {
+              activeShell = nextShell
+              printRichInfo("Returning to command mode.\n")
+              help()
             }
             ""
         }

@@ -1,7 +1,7 @@
 package com.micronautics.cli
 
 import javax.script.{Bindings, ScriptEngineFactory}
-import com.micronautics.evaluator.JavaScript
+import com.micronautics.evaluator.JavaScriptEvaluator
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -9,9 +9,9 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TestyMcTestFace extends WordSpec with MustMatchers {
-  val js = new JavaScript(useClassloader = false)
+  val js = new JavaScriptEvaluator(useClassloader = false)
 
-  "JavaScript" should {
+  "JavaScriptEvaluator" should {
     "work" in {
       js.scriptEngineOk shouldBe true
       val engineFactories: List[ScriptEngineFactory] = js.scriptEngineFactories
