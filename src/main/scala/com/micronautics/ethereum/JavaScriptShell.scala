@@ -4,13 +4,13 @@ import com.micronautics.cli.MainLoop.{mainLoop, terminal}
 import com.micronautics.terminal.TerminalStyles.printRichInfo
 import com.micronautics.cli.{CNodes, MainLoop, Shell}
 
-object JavaScriptShell extends Completers {
-  lazy val cNodes: CNodes = CNodes()
+object JavaScriptShell {
+  lazy val cNodes: CNodes = CNodes.empty
 }
 
 class JavaScriptShell extends Shell(
   prompt = "javascript",
-  cNodes = CNodes(),
+  cNodes = CNodes.empty,
   evaluator = MainLoop.jsEvaluator,
   topHelpMessage = "Top help message for JavaScript shell"
 ) {

@@ -9,53 +9,93 @@ import org.jline.reader.{Binding, LineReader, Macro, ParsedLine, Reference}
 import org.jline.utils.InfoCmp.Capability
 import scala.collection.JavaConverters._
 
-trait ShellCommands extends ShellLike {
-}
+object EthereumShell {
+  lazy val accountCNode = CNode(
+    "account",
+    helpMessage = "Ethereum account management",
+    children =  CNodes(
+      CNode("import", helpMessage = "TODO what does this do?", children = CNodes(CNode("<keyfile>"))),
+      CNode("list",   helpMessage = "List Ethereum accounts"),
+      CNode("new",    helpMessage = "Create a new Ethereum account"),
+      CNode("update", helpMessage = "TODO what does this do?", children = CNodes(CNode("<accountAddress>")))
+    )
+  )
 
-object EthereumShell extends Completers {
+  lazy val bindKeyCNode = CNode("bindkey", helpMessage="Show all key bindings")
+
+  lazy val exitCNode = CNode("exit", helpMessage="Display this message", alias="^d") // todo automatically add this CNode
+
+  lazy val javaScriptCNode = CNode("javascript", helpMessage="Enter JavaScriptEvaluator console")
+
+  // todo display help when this is chosen
+  lazy val helpCNode = CNode("help", alias="?") // todo automatically add this CNode
+
+  lazy val passwordCNode = CNode("password", helpMessage="Set the password")
+
+  lazy val setCNode = CNode(
+    "set",
+    helpMessage = s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'",
+    children = CNodes(
+      CNode("name", helpMessage="TODO what does this do?"), CNode("<newValue>")
+    )
+  )
+
+  lazy val testKeyCNode = CNode(
+    "testkey",
+    helpMessage = "Test a key binding",
+    children = CNodes(CNode("<key>"))
+  )
+
+  lazy val tPutCNode = CNode(
+    "tput",
+    helpMessage="Demonstrate a terminal capability, such as 'bell'",
+    children = CNodes(CNode("bell"))
+  )
+
   lazy val cNodes: CNodes =
     CNodes(
-      CNode("account",    helpMessage="Ethereum account management"),
-      CNode("bindkey",    helpMessage="Show all key bindings"),
-      CNode("exit",       helpMessage="Display this message", alias="^d"),
-      CNode("javascript", helpMessage="Enter JavaScriptEvaluator console"),
-      CNode("help",       alias="?"),
-      CNode("password",   helpMessage="Set the password"),
-      CNode("set",        helpMessage=s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'"),
-      CNode("testkey",    helpMessage="Test a key binding"),
-      CNode("tput",       helpMessage="Demonstrate a terminal capability, such as 'bell'")
+      accountCNode,
+      bindKeyCNode,
+      exitCNode,
+      javaScriptCNode,
+      helpCNode,
+      passwordCNode,
+      setCNode,
+      testKeyCNode,
+      tPutCNode
     )
 }
 
 class EthereumShell extends Shell(
   prompt = "beth",
-  cNodes = CNodes(),
+  cNodes = CNodes.empty,
   evaluator = MainLoop.ethereumEvaluator,
   topHelpMessage = "Top help message for Ethereum shell"
 ) {
   import com.micronautics.terminal.TerminalStyles._
   import MainLoop._
+  import EthereumShell._
 
   def input(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
     parsedLine.word match {
-      case "account" => account(parsedLine)
+      case accountCNode.name => account(parsedLine)
 
-      case "bindkey" => bindKey(parsedLine)
+      case bindKeyCNode.name => bindKey(parsedLine)
 
-      case "javascript" =>
+      case javaScriptCNode.name =>
         Main.shellManager.shellStack.push(jsShell)
         printRichInfo("Entering JavaScriptEvaluator mode. Press Control-d to return to command mode.\n")
 
-      case "help" | "?" | "" => // todo move this check to the main loop
+      case helpCNode.name | helpCNode.alias | "" => // todo move this check to the main loop
         terminal.writer.println(s"\n$topHelpMessage")
         mainLoop.help(true)
 
-      case "set" => set(parsedLine)
+      case setCNode.name => set(parsedLine)
 
-      case "testkey" => testKey()
+      case testKeyCNode.name => testKey()
 
-      case "tput" => tput(parsedLine)
+      case tPutCNode.name => tput(parsedLine)
 
       case x =>
         printRichError(s"'$x' is an unknown command.") // todo show entire help

@@ -15,6 +15,10 @@ object StringOrTuple {
   implicit object TupleWitness extends StringOrTuple[(String, String)]
 }
 
+object CNodes {
+  def empty: CNodes = CNodes()
+}
+
 /** Wraps a collection of [[CNode]] */
 case class CNodes(cNodes: CNode*) {
   lazy val aliases: List[String] = sortedNodes.map(_.alias)
