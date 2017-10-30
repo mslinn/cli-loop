@@ -15,7 +15,7 @@ import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 case class GlobalConfig(productName: String)
 
 object MainLoop {
-  val globalConfig: GlobalConfig = ConfigFactory.load().as[GlobalConfig]("cliLoop") match {
+  val globalConfig: GlobalConfig = ConfigFactory.load.as[GlobalConfig]("cliLoop") match {
     case Left(error) =>
       System.err.println("Configuration error: " + error.getMessage)
       sys.exit(0)
