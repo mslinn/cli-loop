@@ -67,7 +67,7 @@ class MainLoop extends ShellLike {
 
   var reader: LineReader = MainLoop.reader(parser, terminal)
 
-  val cNodes: CNodes = CNodes() // todo make this real
+  val cNodes: CNodes = EthereumShell.cNodes
 
   // List might contain a name: String or (name: String, alias: String)
   val commands: List[Any] = Nil
@@ -130,11 +130,11 @@ class MainLoop extends ShellLike {
           case _: EndOfFileException =>
             val (nextShell, shellStack) = ShellManager.shellStack.pop()
             if (shellStack.isEmpty) {
-                printRichInfo("\nExiting program.")
+                printRichInfo("\nExit")
                 System.exit(0)
             } else {
               activeShell = nextShell
-              printRichInfo("Returning to command mode.\n")
+              printRichInfo(s"Returning to ${ activeShell.prompt }.\n")
               help()
             }
             ""

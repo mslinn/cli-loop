@@ -1,10 +1,8 @@
-organization := "com.micronautics"
-
 name := "cli-loop"
-
+organization := "com.micronautics"
 version := "0.1.1"
-
 scalaVersion := "2.12.4"
+licenses +=  ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
 scalacOptions ++= Seq(
   "-deprecation",

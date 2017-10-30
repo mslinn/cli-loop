@@ -1,42 +1,32 @@
 package com.micronautics.cli
 
 import com.micronautics.terminal.TerminalCapabilities
-import com.micronautics.terminal.TerminalStyles._
+import com.micronautics.terminal.TerminalStyles.{defaultStyle, helpCNameStyle, helpStyle}
 import org.jline.builtins.Completers.TreeCompleter
 import org.jline.builtins.Completers.TreeCompleter.{Node, node}
 import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter}
 import org.jline.utils.AttributedStringBuilder
 
-object CNode {
-  protected val nullFunction: Any => Any = (_: Any) => null.asInstanceOf[Any]
-}
+/** @see http://stackoverflow.com/a/3508555/553865 */
+sealed trait StringOrTuple[-T]
 
-case class CNode(
-  name: String,
-  function: Any => Any = CNode.nullFunction,
-  helpMessage: String = "",
-  children: CNodes = CNodes(),
-  alias: String = ""
-) {
-  lazy val paddedChildNames: List[String] = children.paddedNames
-
-  lazy val richHelp: String = if (TerminalCapabilities.supportsAnsi) {
-    val asb: AttributedStringBuilder =
-      new AttributedStringBuilder()
-        .append("\n")
-        .style(helpStyle)
-        .append(helpMessage)
-        .style(defaultStyle)
-    asb.toAnsi
-  } else helpMessage
-
-  lazy val width: Int = math.max(name.length, alias.length)
-
-  def paddedName(width: Int): String = name + " "*(width - name.length)
+object StringOrTuple {
+  implicit object StringWitness extends StringOrTuple[String]
+  implicit object TupleWitness extends StringOrTuple[(String, String)]
 }
 
 /** Wraps a collection of [[CNode]] */
 case class CNodes(cNodes: CNode*) {
+  lazy val aliases: List[String] = sortedNodes.map(_.alias)
+
+  lazy val commandNames: List[String] = sortedNodes.map(_.name)
+
+  /** @return List("name1", ("name2", "alias"), "name3") */
+  def commandAliasNames[T: StringOrTuple]: List[T] = sortedNodes.map {
+    case node if node.alias.isEmpty => node.name.asInstanceOf[T]
+    case node                       => (node.name, node.alias).asInstanceOf[T]
+  }
+
   lazy val isEmpty: Boolean = cNodes.isEmpty
 
   lazy val maxWidth: Int = cNodes.map(_.width).max
@@ -48,7 +38,7 @@ case class CNodes(cNodes: CNode*) {
   lazy val sortedNodes: List[CNode] = cNodes.toList.sortBy(_.name)
 
   /** Useful for help messages? Delete? */
-  lazy val paddedNames: List[String] =
+  lazy val paddedCommandNames: List[String] =
     sortedNodes.map(node => node.paddedName(maxWidth))
 
   lazy val helpMessages: String =
