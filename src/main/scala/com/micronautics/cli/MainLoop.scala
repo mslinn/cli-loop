@@ -1,14 +1,28 @@
 package com.micronautics.cli
 
+import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.ethereum._
-import com.micronautics.evaluator.{EthereumEvaluator, JavaScriptEvaluator}
+import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator}
+import com.micronautics.terminal.TerminalCapabilities
+import com.typesafe.config.ConfigFactory
+import io.circe.config.syntax._
+import io.circe.generic.auto._
+import org.jline.reader.impl.DefaultParser
 import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, Parser, UserInterruptException}
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
-import TerminalStyles._
-import org.jline.reader.impl.DefaultParser
+
+case class GlobalConfig(productName: String)
 
 object MainLoop {
+  val globalConfig: GlobalConfig = ConfigFactory.load.as[GlobalConfig]("cliLoop") match {
+    case Left(error) =>
+      System.err.println("Error: " + error.getMessage)
+      sys.exit(0)
+
+    case Right(config) => config
+  }
+
   implicit lazy val parser: DefaultParser = new DefaultParser
   parser.setEofOnUnclosedQuote(true)
 
@@ -19,11 +33,11 @@ object MainLoop {
 
   lazy val mainLoop: MainLoop = new MainLoop
 
-  lazy val ethereumEvaluator: EthereumEvaluator = new EthereumEvaluator().setup()
-  lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
-
+  lazy val ethereumEvaluator: Evaluator = new EthereumEvaluator().setup()
   lazy val ethereumShell: EthereumShell = new EthereumShell()
-  lazy val jsShell: EthereumShell = new JavaScriptShell()
+
+  lazy val jsEvaluator: Evaluator = new JavaScriptEvaluator().setup()
+  lazy val jsShell: JavaScriptShell = new JavaScriptShell()
 
   private var _activeShell: Shell = ethereumShell
 
@@ -49,9 +63,17 @@ object MainLoop {
 }
 
 class MainLoop extends ShellLike {
-  import MainLoop._
+  import com.micronautics.cli.MainLoop._
 
   var reader: LineReader = MainLoop.reader(parser, terminal)
+
+  val cNodes: CNodes = CNodes() // todo make this real
+
+  // List might contain a name: String or (name: String, alias: String)
+  val commands: List[Any] = Nil
+
+  val aliases: List[String] = Nil
+
 
   def run(): Unit = {
     help()
@@ -60,17 +82,13 @@ class MainLoop extends ShellLike {
   }
 
 
-  protected def fullHelp(): Unit
+  protected def fullHelp(): Unit = println("TODO Write MainLoop fullHelp")
 
-  protected def processCommandLine(line: String): Unit
-
-  protected def processJavaScriptLine(line: String): AnyRef
-
-  protected def signInMessage(): Unit
+  protected def signInMessage(): Unit = println("TODO Write MainLoop sign in message")
 
 
   // todo add parameters for helpCmd name/value tuples/triples
-  protected def help(full: Boolean = false): Unit = {
+  def help(full: Boolean = false): Unit = {
     /** This implicit acts as a local accumulator for the rich help message */
     implicit val asb: AttributedStringBuilder = {
       val asBuilder = new AttributedStringBuilder
@@ -131,10 +149,8 @@ class MainLoop extends ShellLike {
 
         if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit"))
           more = false
-        else if (mode==EthereumMode.COMMAND)
-          processCommandLine(line)
-        else if (mode==EthereumMode.JAVASCRIPT)
-          processJavaScriptLine(line)
+
+        activeShell.evaluator.eval(line)
       }
     }
   }
@@ -142,14 +158,14 @@ class MainLoop extends ShellLike {
   protected def prompt: String = {
     val asBuilder = new AttributedStringBuilder
     if (!TerminalCapabilities.supportsAnsi)
-      asBuilder.append(s"promptName [$gitBranch] ${ mode.name.toLowerCase }> ")
+      asBuilder.append(s"promptName [$gitBranch] ${ activeShell.prompt.toLowerCase }> ")
     else asBuilder
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-           .append(promptName)
+           .append(globalConfig.productName)
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
            .append(s" [$gitBranch]")
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-           .append(s" ${ mode.name.toLowerCase }")
+           .append(s" ${ activeShell.prompt.toLowerCase }")
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA))
            .append("> ")
            .style(AttributedStyle.DEFAULT.foregroundDefault)

@@ -10,21 +10,38 @@ case class Shell(
   evaluator: Evaluator,
   topHelpMessage: String = ""
 ) {
-  lazy val commandFunctions: Map[String, Any => Any] =
-    cNodes.cNodes.map {
+  /** Maps names and aliases to functions */
+  lazy val commandFunctions: Map[String, Any => Any] = {
+    val nameToFunction = cNodes.cNodes.map {
       case CNode(name, function, _, _, _) => (name, function)
-    }.toMap
+    }
 
-  def functionFor(name: String): Option[Any => Any] = commandFunctions.get(name)
+    val aliasToFunction = cNodes.cNodes.map {
+      case CNode(_, function, _, _, alias) if alias.trim.nonEmpty => (alias, function)
+    }
 
-  lazy val commandHelps: Map[String, String] =
-    cNodes
-      .cNodes
-      .sortBy(_.name)
-      .map { case CNode(name, _, helpMessage, _, _) => (name, helpMessage) }
-      .toMap
+    (nameToFunction ++ aliasToFunction).toMap
+  }
+
+  lazy val completeHelpMessage: String = {
+    val widest = commandHelps.map(_._1.length).max
+    topHelpMessage + "\n" + commandHelps.map { help =>
+      val paddedName = help._1 + " "*(widest - help._1.length)
+      s"$paddedName - ${ help._2 }"
+    }.mkString("\n")
+  }
+
+  def functionFor(nameOrAlias: String): Option[Any => Any] = commandFunctions.get(nameOrAlias)
 
   def helpFor(name: String): Option[String] = commandHelps.get(name)
 
-  lazy val completeHelpMessage: String = topHelpMessage + commandHelps.map { help => s"${ help._1 } - ${ help._2 }"  }
+  protected lazy val commandHelps: Map[String, String] =
+    cNodes
+      .cNodes
+      .sortBy(_.name)
+      .map { case CNode(name, _, helpMessage, _, alias) =>
+        val key = if (alias.nonEmpty) s"$name/$alias" else name
+        (key, helpMessage)
+      }
+      .toMap
 }

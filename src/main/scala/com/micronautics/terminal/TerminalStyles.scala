@@ -1,4 +1,4 @@
-package com.micronautics.cli
+package com.micronautics.terminal
 
 import org.jline.terminal.Terminal
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}

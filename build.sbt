@@ -40,6 +40,8 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  "io.circe"          %% "circe-config"     % "0.3.0" withSources(),
+  "io.circe"          %% "circe-generic"    % "0.8.0" withSources(),
   "org.jline"         %  "jline"            % "3.5.1" withSources(),
   "org.eclipse.jgit"  %  "org.eclipse.jgit" % "4.9.0.201710071750-r" withSources(),
   "ch.qos.logback"    %  "logback-classic"  % "1.2.3",

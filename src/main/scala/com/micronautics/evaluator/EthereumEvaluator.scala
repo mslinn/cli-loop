@@ -1,13 +1,31 @@
 package com.micronautics.evaluator
 
 class EthereumEvaluator extends Evaluator {
-  def init() = ???
+  override def init(): EvaluatorInfo = {
+    // todo perform session initialization
 
-  def input(text: String) = ???
+    info
+  }
 
-  def setup() = ???
+  def eval(text: String): AnyRef = "TODO implement EthereumEvaluator.eval()"
 
-  def shutdown() = ???
+  override def setup(): Evaluator = {
+    // todo perform any configuration
 
-  def status = ???
+    this
+  }
+
+  override def shutdown(): EvaluatorStatus = {
+    // todo save session context somehow
+    super.shutdown()
+  }
+
+
+  protected def info = EvaluatorInfo(
+    engineName = "Ethereum library name goes here",
+    engineVersion = "Ethereum library version goes here",
+    evaluatorName = "Ethereum library name goes here",
+    evaluatorVersion = s"Ethereum library version goes here | Micronautics v0.1.0",
+    names = List("ethereum", "eth")
+  )
 }

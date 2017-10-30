@@ -1,6 +1,7 @@
 package com.micronautics.ethereum
 
 import java.util.{Map => JMap}
+import com.micronautics.Main
 import com.micronautics.cli._
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.LineReaderImpl
@@ -30,12 +31,12 @@ class EthereumShell extends Shell(
   prompt = "beth",
   cNodes = CNodes(),
   evaluator = MainLoop.ethereumEvaluator,
-  topHelpMessage = ""
+  topHelpMessage = "Top help message for Ethereum shell"
 ) {
-  import TerminalStyles._
+  import com.micronautics.terminal.TerminalStyles._
   import MainLoop._
 
-  protected def processCommandLine(line: String): Unit = {
+  def input(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
     parsedLine.word match {
       case "account" => account(parsedLine)
@@ -43,13 +44,12 @@ class EthereumShell extends Shell(
       case "bindkey" => bindKey(parsedLine)
 
       case "javascript" =>
-        Main.shellManager.shellStack.push(jsShell)    // new order
-        // mode = EthereumMode.JAVASCRIPT // old order
+        Main.shellManager.shellStack.push(jsShell)
         printRichInfo("Entering JavaScriptEvaluator mode. Press Control-d to return to command mode.\n")
 
-      case "help" | "?" =>
-        terminal.writer.println()
-        help(true)
+      case "help" | "?" | "" => // todo move this check to the main loop
+        terminal.writer.println(s"\n$topHelpMessage")
+        mainLoop.help(true)
 
       case "set" => set(parsedLine)
 
@@ -57,17 +57,10 @@ class EthereumShell extends Shell(
 
       case "tput" => tput(parsedLine)
 
-      case "" =>
-        terminal.writer.println()
-        help()
-
       case x =>
-        printRichError(s"'$x' is an unknown command.")
-        help()
+        printRichError(s"'$x' is an unknown command.") // todo show entire help
     }
   }
-
-  protected def processJavaScriptLine(line: String): AnyRef = jsEvaluator.input(line)
 
   def signInMessage(): Unit = printRichHelp("Press <tab> multiple times for tab completion of commands and options.\n")
 
@@ -82,7 +75,7 @@ class EthereumShell extends Shell(
   protected def bindKey(parsedLine: ParsedLine): Unit = {
     if (parsedLine.words.size == 1) {
       val sb = new StringBuilder
-      val bound: JMap[String, Binding] = reader.getKeys.getBoundKeys
+      val bound: JMap[String, Binding] = mainLoop.reader.getKeys.getBoundKeys
       bound.entrySet.forEach { entry =>
         sb.append("\"")
         entry.getKey.chars.forEachOrdered { c =>
@@ -119,7 +112,7 @@ class EthereumShell extends Shell(
       terminal.writer.print(sb.toString)
       terminal.flush()
     } else if (parsedLine.words.size == 3) {
-      reader.getKeys.bind(
+      mainLoop.reader.getKeys.bind(
         new Reference(parsedLine.words.get(2)), KeyMap.translate(parsedLine.words.get(1))
       )
     }
@@ -134,7 +127,7 @@ class EthereumShell extends Shell(
         printRichError("\nNo new value specified for " + parsedLine.words.get(0))
 
       case 3 =>
-        reader.setVariable(parsedLine.words.get(0), parsedLine.words.get(1))
+        mainLoop.reader.setVariable(parsedLine.words.get(0), parsedLine.words.get(1))
 
       case n =>
         printRichError("\nOnly one new value may be specified " +
@@ -148,7 +141,7 @@ class EthereumShell extends Shell(
     val sb = new StringBuilder
     var more = true
     while (more) {
-      val c: Int = reader.asInstanceOf[LineReaderImpl].readCharacter
+      val c: Int = mainLoop.reader.asInstanceOf[LineReaderImpl].readCharacter
       if (c == 10 || c == 13) more = false
       else sb.append(new String(Character.toChars(c)))
     }

@@ -1,15 +1,17 @@
 package com.micronautics.cli
 
+import com.micronautics.terminal.TerminalCapabilities
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
 trait ShellLike {
-  val commands: List[Any]
+  val cNodes: CNodes
 
-  protected lazy val cmdMaxWidth: Int = commands.map {
-    case string: String => string.length
-    case (name: String, alias: String) => name.length + alias.length + 1
+  /* @return length of longest command / alias combination */
+  protected lazy val cmdMaxWidth: Int = cNodes.cNodes.map {
+    case cNode if cNode.alias.isEmpty => cNode.name.length
+    case cNode => cNode.name.length + "/".length + cNode.alias.length
   }.max
 
   protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)

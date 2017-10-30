@@ -1,22 +1,20 @@
 package com.micronautics.evaluator
 
 import javax.script.{ScriptEngineFactory, ScriptException}
+import com.micronautics.cli.MainLoop
 
 /** @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
 class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
-  import com.micronautics.cli.TerminalStyles._
+  import com.micronautics.terminal.TerminalStyles._
   import scala.collection.JavaConverters._
+  import MainLoop._
 
   protected lazy val scriptEngineManager: ScriptEngineManager =
     if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
     else new ScriptEngineManager()
 
   lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
-
-  protected var linesInput: Int = 0
-  protected var lastErrorInputLine: Option[Int] = None
-  protected var lastErrorMessage: Option[String] = None
 
 
   def init(): EvaluatorInfo = {
@@ -26,7 +24,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   }
 
   /** User input is passed to the `JavaScriptEvaluator` `EvaluatorLike` subclass */
-  def input(string: String): AnyRef =
+  def eval(string: String): AnyRef =
     try {
       if (scriptEngine==null) scriptEngineOk
       val globalValue = scriptEngine.eval(string, bindingsGlobal)
@@ -94,7 +92,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   def scopeKeysGlobal: Set[String] = bindingsGlobal.keySet.asScala.toSet
 
   /** Initialize JavaScriptEvaluator instance */
-  def setup() = {
+  def setup(): Evaluator = {
     try {
       // todo reload context from a previous session
     } catch {
@@ -128,31 +126,22 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
            |""".stripMargin)
     }
 
+  // todo delete because it is not used
   def showEvaluation(expression: String): JavaScriptEvaluator = {
-    val result: AnyRef = input(expression)
+    val result: AnyRef = eval(expression)
     println(s"$expression => $result")
     this
   }
 
-  def shutdown(): EvaluatorStatus = {
+  override def shutdown(): EvaluatorStatus = {
     // todo save session context somehow
 
-    EvaluatorStatus(
-      linesInput = linesInput,
-      lastErrorInputLine = lastErrorInputLine,
-      lastErrorMessage = lastErrorMessage
-    )
+    super.shutdown()
   }
 
-  def status = EvaluatorStatus(
-    linesInput = linesInput,
-    lastErrorInputLine = lastErrorInputLine,
-    lastErrorMessage = lastErrorMessage
-  )
+  protected[evaluator] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
 
-  protected[ethereum] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
-
-  protected[ethereum] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
+  protected[evaluator] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
 
   protected def info = EvaluatorInfo(
     engineName = factory.getEngineName,

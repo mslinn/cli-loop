@@ -1,13 +1,14 @@
 package com.micronautics.cli
 
-import com.micronautics.cli.TerminalStyles._
+import com.micronautics.terminal.TerminalCapabilities
+import com.micronautics.terminal.TerminalStyles._
 import org.jline.builtins.Completers.TreeCompleter
 import org.jline.builtins.Completers.TreeCompleter.{Node, node}
 import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter}
 import org.jline.utils.AttributedStringBuilder
 
 object CNode {
-  protected val nullFunction: Any => Any = () => {}
+  protected val nullFunction: Any => Any = (_: Any) => null.asInstanceOf[Any]
 }
 
 case class CNode(
@@ -29,7 +30,7 @@ case class CNode(
     asb.toAnsi
   } else helpMessage
 
-  lazy val width: Int = name.length
+  lazy val width: Int = math.max(name.length, alias.length)
 
   def paddedName(width: Int): String = name + " "*(width - name.length)
 }
@@ -96,7 +97,7 @@ case class CNodes(cNodes: CNode*) {
       if (cNode.children.isEmpty) node(cNode.name)
       else {
         val childNodes: Seq[Node] = convertToNodes(cNode.children.cNodes.toList)
-        node(cNode.name, childNodes: _*)
+        node(cNode.name, childNodes)
       }
     }
 }

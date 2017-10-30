@@ -1,8 +1,8 @@
-package com.micronautics.cli
+package com.micronautics.terminal
 
+import java.util.{HashMap => JHashMap, HashSet => JHashSet, Map => JMap, Set => JSet}
 import org.jline.utils.InfoCmp
 import org.jline.utils.InfoCmp.Capability
-import java.util.{HashMap => JHashMap, HashSet => JHashSet, Map => JMap, Set => JSet}
 
 // Could call `AttributedString.stripAnsi(string)` throughout if no color
 object TerminalCapabilities {
