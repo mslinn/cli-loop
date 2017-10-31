@@ -6,13 +6,23 @@ import org.jline.builtins.Completers.TreeCompleter
 import org.jline.builtins.Completers.TreeCompleter.{Node, node}
 import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter}
 import org.jline.utils.AttributedStringBuilder
+import scala.language.implicitConversions
+
 
 object CNodes {
   def empty: CNodes = CNodes()
+
+  implicit def cNodesToNode(cNodes: CNodes): Node = node(cNodes.cNodes.map { cNode =>
+    node(cNode.name, cNode.children.cNodes.toList)
+  }: _*)
+
+  implicit def cNodeToNode(cNode: CNode): Node = node(cNode.name :: cNode.children.cNodes.map(cNodeToNode).toList: _*)
 }
 
 /** Wraps a collection of [[CNode]] */
 case class CNodes(cNodes: CNode*) {
+  import CNodes._
+
   lazy val aliases: List[String] = sortedNodes.map(_.alias)
 
   lazy val commandNames: List[String] = sortedNodes.map(_.name)
@@ -52,10 +62,7 @@ case class CNodes(cNodes: CNode*) {
 
   lazy val maxWidth: Int = cNodes.map(_.width).max
 
-  lazy val nodes: List[Node] = {
-    depthFirst(cNodes.toList.head)
-    convertToNodes(cNodes.toList)
-  }
+  lazy val nodes: List[Node] = cNodes.map(cNodeToNode).toList
 
   lazy val nonEmpty: Boolean = cNodes.nonEmpty
 
