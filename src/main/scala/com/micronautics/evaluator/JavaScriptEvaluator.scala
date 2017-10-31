@@ -23,7 +23,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
     info
   }
 
-  /** User input is passed to the `JavaScriptEvaluator` `EvaluatorLike` subclass */
+  /** User input is passed to the `JavaScriptEvaluator` `Evaluator` subclass */
   def eval(string: String): AnyRef =
     try {
       if (null==scriptEngine) {
@@ -31,7 +31,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
         ""
       } else {
         val globalValue = scriptEngine.eval(string, bindingsGlobal)
-        val engineValue = scriptEngine.eval(string, bindingsEngine)
+//        val engineValue = scriptEngine.eval(string, bindingsEngine)
         val result: Any = globalValue match {
           case x: java.lang.Boolean => Boolean.unbox(x)
           case x: java.lang.Double  => Double.unbox(x)
@@ -56,7 +56,8 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   def isDefined(name: String): Boolean = bindingsGlobal.containsKey(name)
 
   /** All numbers in JavaScriptEvaluator are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
-    * JavaScriptEvaluator does not have integers, so before an `Int` can be provided to the `value` parameter it is first implicitly converted to `Double`. */
+    * JavaScriptEvaluator does not have integers, so before an `Int` can be provided to the `value` parameter
+    * it is first implicitly converted to `Double`. */
   def put(name: String, value: AnyVal): AnyRef = {
     bindingsGlobal.put(name, value)
     val retrieved: AnyRef = bindingsGlobal.get(name)
@@ -64,7 +65,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   }
 
   /** This JavaScriptEvaluator interpreter maintains state throughout the life of the program.
-    * Multiple eval() invocations accumulate state. */
+    * Multiple `eval()` invocations accumulate state. */
   def scriptEngine: ScriptEngine =
     Option(scriptEngineManager.getEngineByName("JavaScript")).map { engine =>
       val bindings: javax.script.Bindings = engine.createBindings
@@ -127,13 +128,6 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
            |Names that can be used to retrieve this engine = ${ engine.getNames.asScala.mkString(", ") }
            |""".stripMargin)
     }
-
-  // todo delete because it is not used
-  def showEvaluation(expression: String): JavaScriptEvaluator = {
-    val result: AnyRef = eval(expression)
-    println(s"$expression => $result")
-    this
-  }
 
   override def shutdown(): EvaluatorStatus = {
     // todo save session context somehow

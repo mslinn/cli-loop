@@ -118,8 +118,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
 
   /** Effectively dds the following commands to every completer: Control-d, help, ?, quit, exit */
   protected def loop(): Unit = {
-    var more = true
-    while (more) {
+    while (shellManager.nonEmpty) {
       val topShell = shellManager.topShell
       val line: String = try { readLine.trim } catch { case _: Exception => "" }
       if (line.nonEmpty) {
@@ -129,11 +128,9 @@ class MainLoop(val shell: Shell) extends ShellLike {
             mainLoop.help(true)
 
           case "quit" | "exit" =>
-            more = false
             exitShell()
 
           case _ =>
-//            printRichDebug(s"About to send '$line' to the '${ topShell.prompt }' shell for parsing.")
             topShell.input(line)
           }
         }
@@ -168,7 +165,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
   }
 
   protected def exit(): Unit = {
-    printRichInfo("\nExit")
+    //printRichInfo("\nExit")
     // todo clean up - one day close the console log
     System.exit(0)
   }
