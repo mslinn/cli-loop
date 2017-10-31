@@ -140,7 +140,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
       }
     }
 
-  protected def readLine: String = {
+  protected def readLine: String =
     try {
       reader.readLine(prompt)
     } catch {
@@ -151,8 +151,11 @@ class MainLoop(val shell: Shell) extends ShellLike {
       case _: EndOfFileException =>
         exitShell()
         ""
+
+      case e: Exception =>
+        printRichError("Error: " + e.getMessage)
+        ""
     }
-  }
 
   protected def exitShell(): Unit = {
     val (nextShell, shellStack) = ShellManager.shellStack.pop()
