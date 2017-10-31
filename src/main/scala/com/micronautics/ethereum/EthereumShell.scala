@@ -67,7 +67,7 @@ object EthereumShell {
 }
 
 class EthereumShell extends Shell(
-  prompt = MainLoop.globalConfig.productName,
+  prompt = "ethereum",
   cNodes = EthereumShell.cNodes,
   evaluator = MainLoop.ethereumEvaluator,
   topHelpMessage = "Top help message for Ethereum shell"
@@ -78,7 +78,7 @@ class EthereumShell extends Shell(
 
   def input(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
-    println(s"parsedLine.word = ${ parsedLine.word }")
+    printRichDebug(s"$prompt: parsedLine.word = ${ parsedLine.word }")
     parsedLine.word match {
       case accountCNode.name => account(parsedLine)
 
@@ -86,10 +86,10 @@ class EthereumShell extends Shell(
 
       case javaScriptCNode.name =>
         Main.shellManager.shellStack.push(jsShell)
-        printRichInfo("Entering JavaScriptEvaluator mode. Press Control-d to return to command mode.\n")
+        printRichInfo(s"Entering the ${ jsShell.prompt } subshell. Press Control-d to exit the subshell.\n")
 
       case helpCNode.name | helpCNode.alias | "" => // todo move this check to the main loop
-        terminal.writer.println(s"\n$topHelpMessage")
+        printRichDebug(s"\n$topHelpMessage")
         mainLoop.help(true)
 
       case setCNode.name => set(parsedLine)
@@ -106,7 +106,7 @@ class EthereumShell extends Shell(
   def signInMessage(): Unit = printRichHelp("Press <tab> multiple times for tab completion of commands and options.\n")
 
   protected def account(pl: ParsedLine): Unit =
-    terminal.writer.println(
+    printRichDebug(
       s"""parsedLine: word = ${ pl.word }, wordIndex = ${ pl.wordIndex }, wordCursor = ${ pl.wordCursor }, cursor = ${ pl.cursor }
          |words = ${ pl.words.asScala.mkString(", ") }
          |line = ${ pl.line }
@@ -150,7 +150,7 @@ class EthereumShell extends Shell(
         sb.append("\n")
         ()
       }
-      terminal.writer.print(sb.toString)
+      printRichDebug(sb.toString)
       terminal.flush()
     } else if (parsedLine.words.size == 3) {
       mainLoop.reader.getKeys.bind(
@@ -172,12 +172,12 @@ class EthereumShell extends Shell(
 
       case n =>
         printRichError("\nOnly one new value may be specified " +
-          s"(you specified ${n - 2} values for ${parsedLine.words.get(0)})")
+          s"(you specified ${ n - 2 } values for ${ parsedLine.words.get(0) })")
     }
   }
 
   protected def testKey(): Unit = {
-    terminal.writer.write("Input the key event (Enter to complete): ")
+    printRichInfo("Input the key event (Enter to complete): ")
     terminal.writer.flush()
     val sb = new StringBuilder
     var more = true
@@ -186,8 +186,7 @@ class EthereumShell extends Shell(
       if (c == 10 || c == 13) more = false
       else sb.append(new String(Character.toChars(c)))
     }
-    terminal.writer.println(KeyMap.display(sb.toString))
-    terminal.writer.flush()
+    printRichInfo(KeyMap.display(sb.toString))
   }
 
   protected def tput(parsedLine: ParsedLine): Unit = parsedLine.words.size match {

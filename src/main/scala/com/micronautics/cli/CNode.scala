@@ -1,8 +1,6 @@
 package com.micronautics.cli
 
-import com.micronautics.terminal.TerminalCapabilities
-import com.micronautics.terminal.TerminalStyles._
-import org.jline.utils.AttributedStringBuilder
+import com.micronautics.terminal.TerminalStyles.help
 
 object CNode {
   protected val nullFunction: Any => Any = (_: Any) => null.asInstanceOf[Any]
@@ -19,15 +17,7 @@ case class CNode(
 
   lazy val paddedChildNames: List[String] = children.paddedCommandNames
 
-  lazy val richHelp: String = if (TerminalCapabilities.supportsAnsi) {
-    val asb: AttributedStringBuilder =
-      new AttributedStringBuilder()
-        .append("\n")
-        .style(helpStyle)
-        .append(helpMessage)
-        .style(defaultStyle)
-    asb.toAnsi
-  } else helpMessage
+  lazy val richHelp: String = help(s"\n$helpMessage")
 
   lazy val width: Int = math.max(name.length, alias.length)
 

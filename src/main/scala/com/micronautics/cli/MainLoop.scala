@@ -124,46 +124,51 @@ class MainLoop(val shell: Shell) extends ShellLike {
     if (full) fullHelp()
   }
 
+  /** Effectively dds the following commands to every completer: Control-d, help, ?, quit, exit */
   protected def loop(): Unit = {
-    val trigger: Option[String] = Some("password")
-    val mask: Character = null  // LineReader.readLine uses null to control behavior // TODO set this value
     var more = true
-
     while (more) {
-      var line: String =
-        try {
-          reader.readLine(prompt)
-        } catch {
-          case _: UserInterruptException =>
-            printRichInfo("Press Control-D to exit.")
-            ""
+      val line: String = try { readLine.trim } catch { case _: Exception => "" }
+      if (line.nonEmpty) {
+        line.toLowerCase match {
+          case "help" | "?" | "" =>
+            printRichHelp(s"\n${ activeShell.topHelpMessage }")
+            mainLoop.help(true)
 
-          case _: EndOfFileException =>
-            val (nextShell, shellStack) = ShellManager.shellStack.pop()
-            if (shellStack.isEmpty) {
-              exit()
-            } else {
-              activeShell = nextShell
-              printRichInfo(s"Returning to ${ activeShell.prompt }.\n")
-              help()
-            }
-            ""
-        }
+          case "quit" | "exit" =>
+            more = false
+            exitShell()
 
-      if (line != null && line.trim.nonEmpty) {
-        line = line.trim
-
-        // If the trigger word is input then the next input line is masked
-        if (trigger.exists(line.compareTo(_) == 0))
-          line = reader.readLine("password> ", mask)
-
-        if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
-          more = false
-        } else {
-          println(s"About to send '$line' to the '${ activeShell.prompt }' evaluator")
-          activeShell.input(line)
+          case _ =>
+            printRichDebug(s"About to send '$line' to the '${ activeShell.prompt }' shell for parsing.")
+            activeShell.input(line)
+          }
         }
       }
+    }
+
+  protected def readLine: String = {
+    try {
+      reader.readLine(prompt)
+    } catch {
+      case _: UserInterruptException =>
+        printRichInfo("Press Control-D to exit.")
+        ""
+
+      case _: EndOfFileException =>
+        exitShell()
+        ""
+    }
+  }
+
+  protected def exitShell(): Unit = {
+    val (nextShell, shellStack) = ShellManager.shellStack.pop()
+    if (shellStack.isEmpty) {
+      exit()
+    } else {
+      activeShell = nextShell
+      printRichInfo(s"Returning to ${ activeShell.prompt }.\n")
+      help()
     }
   }
 
@@ -181,7 +186,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
   protected def prompt: String = {
     val asBuilder = new AttributedStringBuilder
     if (!TerminalCapabilities.supportsAnsi)
-      asBuilder.append(s"promptName$safeGitBranch ${ activeShell.prompt.toLowerCase }> ")
+      asBuilder.append(s"${ globalConfig.productName }$safeGitBranch ${ activeShell.prompt.toLowerCase }> ")
     else asBuilder
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
            .append(globalConfig.productName)

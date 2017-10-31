@@ -8,7 +8,6 @@ import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter}
 import org.jline.utils.AttributedStringBuilder
 import scala.language.implicitConversions
 
-
 object CNodes {
   def empty: CNodes = CNodes()
 
@@ -114,17 +113,6 @@ case class CNodes(cNodes: CNode*) {
       .map(node => node.paddedName(maxWidth))
 
   protected def cNodeFor(name: String): Option[CNode] = cNodes.find(_.name==name)
-
-  def depthFirst(current: CNode, acc: List[CNode]=Nil): List[CNode] = {
-    print(current.nameAlias)
-    current.children.cNodes.foldLeft(acc) { (results, next) =>
-        if (results.contains(next)) results
-        else {
-          print (s" ${ next.nameAlias }")
-          depthFirst(next, results ::: List(current))
-        }
-    } ::: List(current)
-  }
 
   protected def convertToNodes(cNodes: List[CNode]): List[Node] =
     cNodes.map { cNode =>
