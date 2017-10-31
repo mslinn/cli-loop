@@ -62,7 +62,7 @@ case class CNodes(cNodes: CNode*) {
 
   lazy val maxWidth: Int = cNodes.map(_.width).max
 
-  lazy val nodes: List[Node] = cNodes.map(cNodeToNode).toList
+  lazy val nodes: List[Node] = cNodes.toList.map(cNodeToNode)
 
   lazy val nonEmpty: Boolean = cNodes.nonEmpty
 
@@ -81,9 +81,7 @@ case class CNodes(cNodes: CNode*) {
   protected lazy val argumentCompleter: ArgumentCompleter = new ArgumentCompleter()
 
   // TODO unsure how to get argumentCompleter to do something useful
-  lazy val completer: AggregateCompleter = new AggregateCompleter(
-    new ArgumentCompleter(treeCompleter, argumentCompleter)
-  )
+  lazy val completer: AggregateCompleter = new AggregateCompleter(treeCompleter/*, argumentCompleter*/)
 
 
   /** @return List("name1", ("name2", "alias"), "name3") */
