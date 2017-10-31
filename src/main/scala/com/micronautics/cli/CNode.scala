@@ -15,6 +15,8 @@ case class CNode(
   children: CNodes = CNodes(),
   alias: String = ""
 ) {
+  lazy val nameAlias: String = name + (if (alias.isEmpty) "" else s"/$alias")
+
   lazy val paddedChildNames: List[String] = children.paddedCommandNames
 
   lazy val richHelp: String = if (TerminalCapabilities.supportsAnsi) {

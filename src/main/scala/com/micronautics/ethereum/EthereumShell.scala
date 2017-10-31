@@ -67,8 +67,8 @@ object EthereumShell {
 }
 
 class EthereumShell extends Shell(
-  prompt = "beth",
-  cNodes = CNodes.empty,
+  prompt = MainLoop.globalConfig.productName,
+  cNodes = EthereumShell.cNodes,
   evaluator = MainLoop.ethereumEvaluator,
   topHelpMessage = "Top help message for Ethereum shell"
 ) {

@@ -1,8 +1,6 @@
 package com.micronautics.cli
 
 import com.micronautics.terminal.TerminalCapabilities
-import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
 trait ShellLike {
@@ -13,10 +11,6 @@ trait ShellLike {
     case cNode if cNode.alias.isEmpty => cNode.name.length
     case cNode => cNode.name.length + "/".length + cNode.alias.length
   }.max
-
-  protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
-
-  def gitBranch: String = gitRepo.getBranch
 
   // todo control whether rich text is output or not based on the value of useColor
   def bold(name: String, isPenultimate: Boolean = false, isLast: Boolean = false)

@@ -7,14 +7,6 @@ import org.jline.builtins.Completers.TreeCompleter.{Node, node}
 import org.jline.reader.impl.completer.{AggregateCompleter, ArgumentCompleter}
 import org.jline.utils.AttributedStringBuilder
 
-/** @see http://stackoverflow.com/a/3508555/553865 */
-sealed trait StringOrTuple[-T]
-
-object StringOrTuple {
-  implicit object StringWitness extends StringOrTuple[String]
-  implicit object TupleWitness extends StringOrTuple[(String, String)]
-}
-
 object CNodes {
   def empty: CNodes = CNodes()
 }
@@ -25,17 +17,45 @@ case class CNodes(cNodes: CNode*) {
 
   lazy val commandNames: List[String] = sortedNodes.map(_.name)
 
-  /** @return List("name1", ("name2", "alias"), "name3") */
-  def commandAliasNames[T: StringOrTuple]: List[T] = sortedNodes.map {
-    case node if node.alias.isEmpty => node.name.asInstanceOf[T]
-    case node                       => (node.name, node.alias).asInstanceOf[T]
+  /** Maps names and aliases to functions */
+  lazy val commandFunctions: Map[String, Any => Any] = {
+    val nameToFunction = cNodes.map {
+      case CNode(name, function, _, _, _) => (name, function)
+    }
+
+    val aliasToFunction = cNodes.map {
+      case CNode(_, function, _, _, alias) if alias.trim.nonEmpty => (alias, function)
+    }
+
+    (nameToFunction ++ aliasToFunction).toMap
   }
+
+
+  lazy val completeHelpMessage: String = {
+    val widest = commandHelps.map(_._1.length).max
+    commandHelps.map { help =>
+      val paddedName = help._1 + " "*(widest - help._1.length)
+      s"$paddedName - ${ help._2 }"
+    }.mkString("\n")
+  }
+
+  lazy val commandHelps: Map[String, String] =
+    cNodes
+      .sortBy(_.name)
+      .map { case CNode(name, _, helpMessage, _, alias) =>
+        val key = if (alias.nonEmpty) s"$name/$alias" else name
+        (key, helpMessage)
+      }
+      .toMap
 
   lazy val isEmpty: Boolean = cNodes.isEmpty
 
   lazy val maxWidth: Int = cNodes.map(_.width).max
 
-  lazy val nodes: List[Node] = convertToNodes(cNodes.toList)
+  lazy val nodes: List[Node] = {
+    depthFirst(cNodes.toList.head)
+    convertToNodes(cNodes.toList)
+  }
 
   lazy val nonEmpty: Boolean = cNodes.nonEmpty
 
@@ -58,6 +78,12 @@ case class CNodes(cNodes: CNode*) {
     new ArgumentCompleter(treeCompleter, argumentCompleter)
   )
 
+
+  /** @return List("name1", ("name2", "alias"), "name3") */
+  def commandAliasNames: List[Any] = sortedNodes.map {
+    case node if node.alias.isEmpty => node.name
+    case node                       => (node.name, node.alias)
+  }
 
   def helpMessage(name: String): Option[String] =
     for {
@@ -83,15 +109,27 @@ case class CNodes(cNodes: CNode*) {
       .find(_.name==name)
       .map(node => node.paddedName(maxWidth))
 
-
   protected def cNodeFor(name: String): Option[CNode] = cNodes.find(_.name==name)
+
+  def depthFirst(current: CNode, acc: List[CNode]=Nil): List[CNode] = {
+    print(current.nameAlias)
+    current.children.cNodes.foldLeft(acc) { (results, next) =>
+        if (results.contains(next)) results
+        else {
+          print (s" ${ next.nameAlias }")
+          depthFirst(next, results ::: List(current))
+        }
+    } ::: List(current)
+  }
 
   protected def convertToNodes(cNodes: List[CNode]): List[Node] =
     cNodes.map { cNode =>
-      if (cNode.children.isEmpty) node(cNode.name)
-      else {
-        val childNodes: Seq[Node] = convertToNodes(cNode.children.cNodes.toList)
-        node(cNode.name, childNodes)
+      if (cNode.children.isEmpty) {
+        node(cNode.name)
+      } else {
+        val children: List[Node] = convertToNodes(cNode.children.cNodes.toList)
+        val nodes: List[Object] = cNode.name :: children
+        node(nodes: _*)
       }
     }
 }
