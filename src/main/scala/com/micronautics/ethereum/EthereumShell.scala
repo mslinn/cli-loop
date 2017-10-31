@@ -76,7 +76,7 @@ class EthereumShell extends Shell(
   import MainLoop._
   import EthereumShell._
 
-  def eval(line: String): Unit = {
+  def input(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
     println(s"parsedLine.word = ${ parsedLine.word }")
     parsedLine.word match {

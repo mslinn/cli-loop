@@ -161,7 +161,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
           more = false
         } else {
           println(s"About to send '$line' to the '${ activeShell.prompt }' evaluator")
-          activeShell.evaluator.eval(line)
+          activeShell.input(line)
         }
       }
     }

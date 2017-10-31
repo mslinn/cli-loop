@@ -5,7 +5,7 @@
 
 ## Running the Program
 The `bin/run` Bash script assembles this project into a fat jar and runs it.
-Sample usage, which runs the `Hello` entry point in `src/main/scala/Main.java`:
+Sample usage, which runs the `src/main/scala/com/micronautics/Main.scala` entry point:
 
 ```
 $ bin/run
@@ -19,16 +19,13 @@ $ bin/run -j
 ```
 
 You can specify an arbitrary entry point.
-This runs the Scala test program:
 ```
-$ bin/run Main
-```
-
-This runs the Java test program:
-```
-$ bin/run JavaMain
+$ bin/run com.micronautics.Main
 ```
 
 ## Developers
 The `bin/rerun` script is handy when you want to see the changes made to the running program.
 Press `Control-d` to exit the program, and it will automatically be rebuilt with the latest changes and rerun.
+
+Both the `bin/run` and `bin/rerun` scripts enable remote debugging on port 5005, 
+which is IntelliJ IDEA's default remote debugging port.

@@ -32,6 +32,7 @@ SCALA_VERSION() {
 NAME="$( findValue name )"
 VERSION="$( findValue version )"
 JAR=target/scala-`SCALA_VERSION`/$NAME-assembly-$VERSION.jar
+DEBUG="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
 
 if [ "$1" == -j ] || [ ! -f $JAR ]; then
   echo "Building $JAR"
@@ -42,4 +43,4 @@ fi
 
 if [ "$1" ]; then ENTRY="$1"; fi
 
-java -cp "$JAR" "$ENTRY" "$@"
+java "$DEBUG" -cp "$JAR" "$ENTRY" "$@"
