@@ -49,10 +49,13 @@ case class EvaluatorStatus (
   lastErrorMessage: Option[String] = None
 ) {
   override def toString: String = {
-    val lastError = (for {
-      lastLine    <- lastErrorInputLine
-      lastMessage <- lastErrorMessage
-    } yield s";\nLast error was '$lastMessage' on line $lastLine").getOrElse("")
-    s"$linesInput lines input$lastError."
+    val lastError: String = (
+      for {
+        lastLine    <- lastErrorInputLine
+        lastMessage <- lastErrorMessage
+      } yield s";\nLast error was '$lastMessage' on line $lastLine"
+    ).getOrElse("")
+    //s"$linesInput lines input$lastError."
+    lastError
  }
 }
