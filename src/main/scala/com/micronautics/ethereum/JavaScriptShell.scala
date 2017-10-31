@@ -11,8 +11,9 @@ object JavaScriptShell {
 class JavaScriptShell extends Shell(
   prompt = "javascript",
   cNodes = CNodes.empty,
-  evaluator = MainLoop.jsEvaluator,
-  topHelpMessage = s"${ MainLoop.jsEvaluator.info }${ MainLoop.jsEvaluator.status }"
+  evaluator = MainLoop.jsEvaluator
 ) {
   def input(line: String): Unit = printRichInfo(s"${ evaluator.eval(line)}\n")
+
+  def topHelpMessage: String = s"${ MainLoop.jsEvaluator.info }${ evaluator.status }"
 }

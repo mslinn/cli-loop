@@ -9,9 +9,10 @@ import org.jline.reader.Completer
 abstract case class Shell(
   prompt: String,
   cNodes: CNodes,
-  evaluator: Evaluator,
-  topHelpMessage: String = ""
+  evaluator: Evaluator
 ) {
+  lazy val completeHelpMessage: String = s"$topHelpMessage\n\n${ cNodes.completeHelpMessage }"
+
   lazy val completer: Completer = cNodes.completer
 
   lazy val nodes: List[Node] = cNodes.nodes
@@ -22,5 +23,5 @@ abstract case class Shell(
 
   def input(line: String): Unit
 
-  lazy val completeHelpMessage: String = s"$topHelpMessage\n\n${ cNodes.completeHelpMessage }"
+  def topHelpMessage: String
 }

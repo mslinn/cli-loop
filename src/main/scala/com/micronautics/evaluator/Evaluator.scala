@@ -1,9 +1,9 @@
 package com.micronautics.evaluator
 
 trait Evaluator {
-  var linesInput: Int = 0
-  var lastErrorInputLine: Option[Int] = None
-  var lastErrorMessage: Option[String] = None
+  var _linesInput: Int = 0
+  var _lastErrorInputLine: Option[Int] = None
+  var _lastErrorMessage: Option[String] = None
 
   def init(): EvaluatorInfo
 
@@ -16,16 +16,16 @@ trait Evaluator {
   def setup(): Evaluator
 
   def shutdown(): EvaluatorStatus = EvaluatorStatus(
-    linesInput = linesInput,
-    lastErrorInputLine = lastErrorInputLine,
-    lastErrorMessage = lastErrorMessage
+    linesInput = _linesInput,
+    lastErrorInputLine = _lastErrorInputLine,
+    lastErrorMessage = _lastErrorMessage
   )
 
   /** Evaluator status query */
   def status = EvaluatorStatus(
-    linesInput = linesInput,
-    lastErrorInputLine = lastErrorInputLine,
-    lastErrorMessage = lastErrorMessage
+    linesInput = _linesInput,
+    lastErrorInputLine = _lastErrorInputLine,
+    lastErrorMessage = _lastErrorMessage
   )
 }
 
@@ -50,7 +50,7 @@ case class EvaluatorStatus (
 ) {
   override def toString: String = {
     val lastError = (for {
-      lastLine <- lastErrorInputLine
+      lastLine    <- lastErrorInputLine
       lastMessage <- lastErrorMessage
     } yield s";\nLast error was '$lastMessage' on line $lastLine").getOrElse("")
     s"$linesInput lines input$lastError."

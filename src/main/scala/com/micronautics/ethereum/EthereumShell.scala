@@ -68,12 +68,13 @@ object EthereumShell {
 class EthereumShell extends Shell(
   prompt = "ethereum",
   cNodes = EthereumShell.cNodes,
-  evaluator = MainLoop.ethereumEvaluator,
-  topHelpMessage = s"Micronautics Research Ethereum Shell v${ GlobalConfig.instance.version }"
+  evaluator = MainLoop.ethereumEvaluator
 ) {
   import com.micronautics.cli.MainLoop._
   import com.micronautics.ethereum.EthereumShell._
   import com.micronautics.terminal.TerminalStyles._
+
+  val topHelpMessage = s"Micronautics Research Ethereum Shell v${ GlobalConfig.instance.version }"
 
   def input(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)

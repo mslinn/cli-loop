@@ -18,6 +18,10 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
 
 
   def init(): EvaluatorInfo = {
+    _linesInput = 0
+    _lastErrorInputLine = None
+    _lastErrorMessage = None
+
     // todo reload previous session context somehow
 
     info
@@ -26,6 +30,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   /** User input is passed to the `JavaScriptEvaluator` `Evaluator` subclass */
   def eval(string: String): AnyRef =
     try {
+      _linesInput = _linesInput + 1
       if (null==scriptEngine) {
         scriptEngineOk
         ""

@@ -52,27 +52,17 @@ object MainLoop {
 class MainLoop(val shell: Shell) extends ShellLike {
   import com.micronautics.cli.MainLoop._
 
-  def reader: LineReader = MainLoop.reader(parser, terminal)
-
   val cNodes: CNodes = shell.cNodes
-
-  // List might contain a name: String or (name: String, alias: String)
-  def commands: List[Any] = cNodes.commandAliasNames
 
   val aliases: List[String] = cNodes.aliases
 
 
-  def run(): Unit = {
-    signInMessage()
-    help()
-    loop()
-  }
-
-
-  protected def signInMessage(): Unit = printRichHelp(shellManager.topShell.topHelpMessage)
-
+  // List might contain a name: String or (name: String, alias: String)
+  def commands: List[Any] = cNodes.commandAliasNames
 
   // todo add parameters for helpCmd name/value tuples/triples
+  /** Show the command names and maybe additional information
+    * @param showCompleteHelp Show a description of each command */
   def help(showCompleteHelp: Boolean = false): Unit = {
     /** This implicit acts as a local accumulator for the rich help message */
     implicit val asb: AttributedStringBuilder = {
@@ -102,7 +92,31 @@ class MainLoop(val shell: Shell) extends ShellLike {
     ()
   }
 
-  /** Effectively dds the following commands to every completer: Control-d, help, ?, quit, exit */
+  def reader: LineReader = MainLoop.reader(parser, terminal)
+
+  def run(): Unit = {
+    signInMessage()
+    help()
+    loop()
+  }
+
+
+  protected def exit(): Unit = {
+    // todo clean up - one day close the console log
+    System.exit(0)
+  }
+
+  protected def exitShell(): Unit = {
+    val (nextShell, shellStack) = ShellManager.shellStack.pop()
+    if (shellStack.isEmpty) {
+      exit()
+    } else {
+      printRichInfo(s"Returning to ${ nextShell.prompt }.\n")
+      help()
+    }
+  }
+
+  /** Effectively adds the following commands to every completer: Control-d, help, ?, quit, exit */
   protected def loop(): Unit = {
     while (shellManager.nonEmpty) {
       val topShell = shellManager.topShell
@@ -123,43 +137,6 @@ class MainLoop(val shell: Shell) extends ShellLike {
       }
     }
 
-  protected def readLine: String =
-    try {
-      reader.readLine(prompt)
-    } catch {
-      case _: UserInterruptException =>
-        printRichInfo("Press Control-D to exit.")
-        ""
-
-      case _: EndOfFileException =>
-        exitShell()
-        ""
-
-      case e: Exception =>
-        printRichError("Error: " + e.getMessage)
-        ""
-    }
-
-  protected def exitShell(): Unit = {
-    val (nextShell, shellStack) = ShellManager.shellStack.pop()
-    if (shellStack.isEmpty) {
-      exit()
-    } else {
-      printRichInfo(s"Returning to ${ nextShell.prompt }.\n")
-      help()
-    }
-  }
-
-  protected def exit(): Unit = {
-    // todo clean up - one day close the console log
-    System.exit(0)
-  }
-
-  protected def safeGitBranch: String = {
-    val branch = gitBranch
-    if (branch.nonEmpty) s" [$gitBranch]" else ""
-  }
-
   protected def prompt: String = {
     import GlobalConfig.instance.productName
     val asBuilder = new AttributedStringBuilder
@@ -177,4 +154,31 @@ class MainLoop(val shell: Shell) extends ShellLike {
            .append("> ")
            .style(AttributedStyle.DEFAULT.foregroundDefault)
   }.toAnsi
+
+  protected def readLine: String =
+    try {
+      reader.readLine(prompt)
+    } catch {
+      case _: UserInterruptException =>
+        printRichInfo("Press Control-D to exit.")
+        ""
+
+      case _: EndOfFileException =>
+        exitShell()
+        ""
+
+      case e: Exception =>
+        printRichError("Error: " + e.getMessage)
+        ""
+    }
+
+  protected def safeGitBranch: String = {
+    val branch = gitBranch
+    if (branch.nonEmpty) s" [$gitBranch]" else ""
+  }
+
+  protected def signInMessage(): Unit = {
+    val msg = shellManager.topShell.topHelpMessage
+    printRichHelp(msg)
+  }
 }

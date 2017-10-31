@@ -15,7 +15,7 @@ case class CNode(
 ) {
   lazy val nameAlias: String = name + (if (alias.isEmpty) "" else s"/$alias")
 
-  lazy val paddedChildNames: List[String] = children.paddedCommandNames
+  lazy val paddedChildNames: List[String] = children.paddedCommandNames // todo delete because it is not used?
 
   lazy val richHelp: String = help(s"\n$helpMessage")
 
