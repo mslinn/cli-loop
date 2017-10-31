@@ -41,16 +41,8 @@ object MainLoop {
 
   lazy val mainLoop: MainLoop = new MainLoop(ethereumShell)
 
-
-  private var _activeShell: Shell = ethereumShell
-
-
-  def activeShell: Shell = _activeShell
-
-  def activeShell_= (newValue: Shell): Unit = {
-    _activeShell = newValue
-    mainLoop.reader = reader(parser, terminal)
-  }
+  lazy val shellManager: ShellManager = ShellManager.instance
+  shellManager.shellStack.push(ethereumShell)
 
   def gitBranch: String = try { gitRepo.getBranch } catch { case _: Exception => "" }
 
@@ -60,7 +52,7 @@ object MainLoop {
   protected def reader(parser: Parser, terminal: Terminal): LineReader = {
     val lineReader: LineReader = LineReaderBuilder.builder
       .terminal(terminal)
-      .completer(activeShell.cNodes.completer)
+      .completer(shellManager.topShell.completer)
       .parser(parser)
       .build
 
@@ -73,7 +65,7 @@ object MainLoop {
 class MainLoop(val shell: Shell) extends ShellLike {
   import com.micronautics.cli.MainLoop._
 
-  var reader: LineReader = MainLoop.reader(parser, terminal)
+  def reader: LineReader = MainLoop.reader(parser, terminal)
 
   val cNodes: CNodes = shell.cNodes
 
@@ -128,11 +120,12 @@ class MainLoop(val shell: Shell) extends ShellLike {
   protected def loop(): Unit = {
     var more = true
     while (more) {
+      val topShell = shellManager.topShell
       val line: String = try { readLine.trim } catch { case _: Exception => "" }
       if (line.nonEmpty) {
         line.toLowerCase match {
           case "help" | "?" | "" =>
-            printRichHelp(s"\n${ activeShell.topHelpMessage }")
+            printRichHelp(s"\n${ topShell.topHelpMessage }")
             mainLoop.help(true)
 
           case "quit" | "exit" =>
@@ -140,8 +133,8 @@ class MainLoop(val shell: Shell) extends ShellLike {
             exitShell()
 
           case _ =>
-            printRichDebug(s"About to send '$line' to the '${ activeShell.prompt }' shell for parsing.")
-            activeShell.input(line)
+            printRichDebug(s"About to send '$line' to the '${ topShell.prompt }' shell for parsing.")
+            topShell.input(line)
           }
         }
       }
@@ -166,8 +159,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
     if (shellStack.isEmpty) {
       exit()
     } else {
-      activeShell = nextShell
-      printRichInfo(s"Returning to ${ activeShell.prompt }.\n")
+      printRichInfo(s"Returning to ${ nextShell.prompt }.\n")
       help()
     }
   }
@@ -185,15 +177,16 @@ class MainLoop(val shell: Shell) extends ShellLike {
 
   protected def prompt: String = {
     val asBuilder = new AttributedStringBuilder
+    val topShell = shellManager.topShell
     if (!TerminalCapabilities.supportsAnsi)
-      asBuilder.append(s"${ globalConfig.productName }$safeGitBranch ${ activeShell.prompt.toLowerCase }> ")
+      asBuilder.append(s"${ globalConfig.productName }$safeGitBranch ${ topShell.prompt }> ")
     else asBuilder
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
            .append(globalConfig.productName)
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
            .append(safeGitBranch)
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-           .append(s" ${ activeShell.prompt.toLowerCase }")
+           .append(s" ${ topShell.prompt.toLowerCase }")
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.MAGENTA))
            .append("> ")
            .style(AttributedStyle.DEFAULT.foregroundDefault)

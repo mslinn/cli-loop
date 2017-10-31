@@ -2,6 +2,7 @@ package com.micronautics.cli
 
 import com.micronautics.evaluator.Evaluator
 import org.jline.builtins.Completers.TreeCompleter.Node
+import org.jline.reader.Completer
 
 /** Contains properties that define shell instances, for example the prompt, help message,
   * maximum command verb length, and a Map of function name to function for each command */
@@ -11,6 +12,8 @@ abstract case class Shell(
   evaluator: Evaluator,
   topHelpMessage: String = ""
 ) {
+  lazy val completer: Completer = cNodes.completer
+
   lazy val nodes: List[Node] = cNodes.nodes
 
   def functionFor(nameOrAlias: String): Option[Any => Any] = cNodes.commandFunctions.get(nameOrAlias)

@@ -1,8 +1,8 @@
 package com.micronautics.ethereum
 
-import com.micronautics.cli.MainLoop.{mainLoop, terminal}
-import com.micronautics.terminal.TerminalStyles.{ printRichDebug, printRichInfo }
+import com.micronautics.cli.MainLoop.terminal
 import com.micronautics.cli.{CNodes, MainLoop, Shell}
+import com.micronautics.terminal.TerminalStyles.printRichInfo
 
 object JavaScriptShell {
   lazy val cNodes: CNodes = CNodes.empty

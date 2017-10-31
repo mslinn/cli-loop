@@ -8,4 +8,6 @@ object ShellManager {
 
 class ShellManager {
   lazy val shellStack: ShellStack = ShellStack.empty
+
+  def topShell: Shell = shellStack.top
 }

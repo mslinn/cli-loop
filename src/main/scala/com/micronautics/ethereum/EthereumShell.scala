@@ -85,7 +85,7 @@ class EthereumShell extends Shell(
       case bindKeyCNode.name => bindKey(parsedLine)
 
       case javaScriptCNode.name =>
-        Main.shellManager.shellStack.push(jsShell)
+        shellManager.shellStack.push(jsShell)
         printRichInfo(s"Entering the ${ jsShell.prompt } subshell. Press Control-d to exit the subshell.\n")
 
       case helpCNode.name | helpCNode.alias | "" => // todo move this check to the main loop
