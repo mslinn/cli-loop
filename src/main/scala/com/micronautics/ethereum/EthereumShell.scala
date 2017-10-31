@@ -86,9 +86,7 @@ class EthereumShell extends Shell(
         shellManager.shellStack.push(jsShell)
         printRichInfo(s"Entering the ${ jsShell.prompt } subshell. Press Control-d to exit the subshell.\n")
 
-      case helpCNode.name | helpCNode.alias | "" => // todo move this check to the main loop
-//        printRichDebug(s"\n$topHelpMessage")
-        mainLoop.help(true)
+      case passwordCNode.name => password(parsedLine)
 
       case setCNode.name => set(parsedLine)
 
@@ -96,8 +94,7 @@ class EthereumShell extends Shell(
 
       case tPutCNode.name => tput(parsedLine)
 
-      case x =>
-        printRichError(s"'$x' is an unknown command.") // todo show entire help
+      case x => printRichError(s"'$x' is an unknown command.") // todo show entire help
     }
   }
 
@@ -157,22 +154,32 @@ class EthereumShell extends Shell(
     }
   }
 
-  protected def set(parsedLine: ParsedLine): Unit = {
+  protected def password(parsedLine: ParsedLine): Unit =
     parsedLine.words.size match {
       case 1 =>
-        printRichError("\nNo variable name or value specified")
+        printRichError("No password value specified")
+
+      case 2 => // todo mask input
+//        val value = parsedLine.words.get(1)
+
+      case n =>
+        printRichError(s"Only one new password may be specified (you specified ${ n - 1 } passwords)")
+    }
+
+  protected def set(parsedLine: ParsedLine): Unit =
+    parsedLine.words.size match {
+      case 1 =>
+        printRichError("No variable name or value specified")
 
       case 2 =>
-        printRichError("\nNo new value specified for " + parsedLine.words.get(0))
+        printRichError("No new value specified for " + parsedLine.words.get(0))
 
       case 3 =>
         mainLoop.reader.setVariable(parsedLine.words.get(0), parsedLine.words.get(1))
 
       case n =>
-        printRichError("\nOnly one new value may be specified " +
-          s"(you specified ${ n - 2 } values for ${ parsedLine.words.get(0) })")
+        printRichError(s"Only one new value may be specified (you specified ${ n - 2 } values)")
     }
-  }
 
   protected def testKey(): Unit = {
     printRichInfo("Input the key event (Enter to complete): ")

@@ -53,10 +53,10 @@ object TerminalStyles {
 
   def richError(message: String): String = {
     val asBuilder = new AttributedStringBuilder
-    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(s" Error: $message ")
+    if (!TerminalCapabilities.supportsAnsi) asBuilder.append(s"Error: $message\n")
     else asBuilder
            .style(errorStyle)
-           .append(s" Error: $message ")
+           .append(s"Error: $message\n")
            .style(defaultStyle)
   }.toAnsi
 
