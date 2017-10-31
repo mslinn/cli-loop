@@ -80,7 +80,6 @@ case class CNodes(cNodes: CNode*) {
   // TODO unsure how to define
   protected lazy val argumentCompleter: ArgumentCompleter = new ArgumentCompleter()
 
-  // TODO unsure how to get argumentCompleter to do something useful
   lazy val completer: AggregateCompleter = new AggregateCompleter(treeCompleter/*, argumentCompleter*/)
 
 
