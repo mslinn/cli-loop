@@ -23,7 +23,7 @@ object MainLoop {
   lazy val ethereumEvaluator: Evaluator = new EthereumEvaluator().setup()
   lazy val ethereumShell: EthereumShell = new EthereumShell
 
-  lazy val jsEvaluator: Evaluator   = new JavaScriptEvaluator().setup()
+  lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup().asInstanceOf[JavaScriptEvaluator]
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
 
   lazy val mainLoop: MainLoop = new MainLoop(ethereumShell)
@@ -63,19 +63,17 @@ class MainLoop(val shell: Shell) extends ShellLike {
 
 
   def run(): Unit = {
-    help()
     signInMessage()
+    help()
     loop()
   }
 
 
-  protected def fullHelp(): Unit = println("TODO Write MainLoop fullHelp")
-
-  protected def signInMessage(): Unit = println("TODO Write MainLoop sign in message")
+  protected def signInMessage(): Unit = printRichHelp(shellManager.topShell.topHelpMessage)
 
 
   // todo add parameters for helpCmd name/value tuples/triples
-  def help(full: Boolean = false): Unit = {
+  def help(showCompleteHelp: Boolean = false): Unit = {
     /** This implicit acts as a local accumulator for the rich help message */
     implicit val asb: AttributedStringBuilder = {
       val asBuilder = new AttributedStringBuilder
@@ -100,7 +98,8 @@ class MainLoop(val shell: Shell) extends ShellLike {
     if (TerminalCapabilities.supportsAnsi) asb.style(defaultStyle)
     terminal.writer.println(asb.toAnsi)
 
-    if (full) fullHelp()
+    if (showCompleteHelp) shellManager.topShell.completeHelpMessage
+    ()
   }
 
   /** Effectively dds the following commands to every completer: Control-d, help, ?, quit, exit */
@@ -111,7 +110,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
       if (line.nonEmpty) {
         line.toLowerCase match {
           case "help" | "?" | "" =>
-            printRichHelp(s"\n${ topShell.topHelpMessage }")
+            printRichHelp(s"\n${ topShell.completeHelpMessage }\n")
             mainLoop.help(true)
 
           case "quit" | "exit" =>

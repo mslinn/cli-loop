@@ -22,5 +22,5 @@ abstract case class Shell(
 
   def input(line: String): Unit
 
-  lazy val completeHelpMessage: String = s"$topHelpMessage\n" + cNodes.completeHelpMessage
+  lazy val completeHelpMessage: String = s"$topHelpMessage\n\n${ cNodes.completeHelpMessage }"
 }

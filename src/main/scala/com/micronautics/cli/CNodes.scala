@@ -41,9 +41,9 @@ case class CNodes(cNodes: CNode*) {
 
 
   lazy val completeHelpMessage: String = {
-    val widest = commandHelps.map(_._1.length).max
+    val widest = if (commandHelps.isEmpty) 0 else commandHelps.map(_._1.length).max
     commandHelps.map { help =>
-      val paddedName = help._1 + " "*(widest - help._1.length)
+      val paddedName = help._1 + " "*math.max(1, widest - help._1.length)
       s"$paddedName - ${ help._2 }"
     }.mkString("\n")
   }

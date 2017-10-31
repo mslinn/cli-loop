@@ -36,10 +36,23 @@ case class EvaluatorInfo (
   evaluatorVersion: String,
   names: List[String],
   extraInfo: String = ""
-)
+) {
+  override def toString: String =
+    s"""JavaScript engine: $engineName v$engineVersion
+       |$evaluatorName / $evaluatorVersion
+       |""".stripMargin
+}
 
 case class EvaluatorStatus (
   linesInput: Int = 0,
   lastErrorInputLine: Option[Int] = None,
   lastErrorMessage: Option[String] = None
-)
+) {
+  override def toString: String = {
+    val lastError = (for {
+      lastLine <- lastErrorInputLine
+      lastMessage <- lastErrorMessage
+    } yield s";\nLast error was '$lastMessage' on line $lastLine").getOrElse("")
+    s"$linesInput lines input$lastError."
+ }
+}

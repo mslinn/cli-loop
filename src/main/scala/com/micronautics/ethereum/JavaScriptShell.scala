@@ -12,7 +12,7 @@ class JavaScriptShell extends Shell(
   prompt = "javascript",
   cNodes = CNodes.empty,
   evaluator = MainLoop.jsEvaluator,
-  topHelpMessage = "Top help message for JavaScript shell"
+  topHelpMessage = s"${ MainLoop.jsEvaluator.info }${ MainLoop.jsEvaluator.status }"
 ) {
   def input(line: String): Unit = printRichInfo(s"${ evaluator.eval(line)}\n")
 }

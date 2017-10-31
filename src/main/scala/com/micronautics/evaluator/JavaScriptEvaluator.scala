@@ -53,6 +53,14 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
 
   def get(name: String): AnyRef = bindingsGlobal.get(name)
 
+  def info = EvaluatorInfo(
+    engineName       = factory.getEngineName,
+    engineVersion    = factory.getEngineVersion,
+    evaluatorName    = factory.getLanguageName,
+    evaluatorVersion = s"${ factory.getLanguageVersion }",
+    names            = factory.getNames.asScala.toList
+  )
+
   def isDefined(name: String): Boolean = bindingsGlobal.containsKey(name)
 
   /** All numbers in JavaScriptEvaluator are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
@@ -138,12 +146,4 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   protected[evaluator] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
 
   protected[evaluator] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
-
-  protected def info = EvaluatorInfo(
-    engineName       = factory.getEngineName,
-    engineVersion    = factory.getEngineVersion,
-    evaluatorName    = factory.getLanguageName,
-    evaluatorVersion = s"${ factory.getLanguageVersion } | Micronautics v0.1.0",
-    names            = factory.getNames.asScala.toList
-  )
 }

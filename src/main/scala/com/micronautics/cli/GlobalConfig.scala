@@ -50,5 +50,6 @@ case class Styles(
 
 case class GlobalConfig(
   productName: String,
+  version: String,
   styles: Styles
 )

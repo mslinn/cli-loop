@@ -69,7 +69,7 @@ class EthereumShell extends Shell(
   prompt = "ethereum",
   cNodes = EthereumShell.cNodes,
   evaluator = MainLoop.ethereumEvaluator,
-  topHelpMessage = "Top help message for Ethereum shell"
+  topHelpMessage = s"Micronautics Research Ethereum Shell v${ GlobalConfig.instance.version }"
 ) {
   import com.micronautics.cli.MainLoop._
   import com.micronautics.ethereum.EthereumShell._
