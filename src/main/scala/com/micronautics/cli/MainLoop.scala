@@ -165,7 +165,6 @@ class MainLoop(val shell: Shell) extends ShellLike {
   }
 
   protected def exit(): Unit = {
-    //printRichInfo("\nExit")
     // todo clean up - one day close the console log
     System.exit(0)
   }

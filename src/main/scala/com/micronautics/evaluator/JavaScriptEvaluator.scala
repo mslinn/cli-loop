@@ -140,10 +140,10 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   protected[evaluator] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
 
   protected def info = EvaluatorInfo(
-    engineName = factory.getEngineName,
-    engineVersion = factory.getEngineVersion,
-    evaluatorName = factory.getLanguageName,
+    engineName       = factory.getEngineName,
+    engineVersion    = factory.getEngineVersion,
+    evaluatorName    = factory.getLanguageName,
     evaluatorVersion = s"${ factory.getLanguageVersion } | Micronautics v0.1.0",
-    names = factory.getNames.asScala.toList
+    names            = factory.getNames.asScala.toList
   )
 }

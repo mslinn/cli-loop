@@ -1,7 +1,6 @@
 package com.micronautics.ethereum
 
 import java.util.{Map => JMap}
-import com.micronautics.Main
 import com.micronautics.cli._
 import org.jline.keymap.KeyMap
 import org.jline.reader.impl.LineReaderImpl
@@ -72,13 +71,12 @@ class EthereumShell extends Shell(
   evaluator = MainLoop.ethereumEvaluator,
   topHelpMessage = "Top help message for Ethereum shell"
 ) {
+  import com.micronautics.cli.MainLoop._
+  import com.micronautics.ethereum.EthereumShell._
   import com.micronautics.terminal.TerminalStyles._
-  import MainLoop._
-  import EthereumShell._
 
   def input(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
-    printRichDebug(s"$prompt: parsedLine.word = ${ parsedLine.word }")
     parsedLine.word match {
       case accountCNode.name => account(parsedLine)
 
@@ -89,7 +87,7 @@ class EthereumShell extends Shell(
         printRichInfo(s"Entering the ${ jsShell.prompt } subshell. Press Control-d to exit the subshell.\n")
 
       case helpCNode.name | helpCNode.alias | "" => // todo move this check to the main loop
-        printRichDebug(s"\n$topHelpMessage")
+//        printRichDebug(s"\n$topHelpMessage")
         mainLoop.help(true)
 
       case setCNode.name => set(parsedLine)

@@ -14,9 +14,5 @@ class JavaScriptShell extends Shell(
   evaluator = MainLoop.jsEvaluator,
   topHelpMessage = "Top help message for JavaScript shell"
 ) {
-  def input(line: String): Unit = {
-    line match {
-      case _ => printRichInfo(evaluator.eval(line).toString)
-    }
-  }
+  def input(line: String): Unit = printRichInfo(s"${ evaluator.eval(line)}\n")
 }
