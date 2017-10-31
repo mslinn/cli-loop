@@ -1,16 +1,18 @@
 package com.micronautics.terminal
 
+import com.micronautics.cli.{GlobalConfig, Styles}
 import org.jline.terminal.Terminal
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
 object TerminalStyles {
-  val defaultStyle: AttributedStyle   = AttributedStyle.DEFAULT
-  val debugStyle: AttributedStyle     = defaultStyle.foreground(AttributedStyle.YELLOW)
-  val errorStyle: AttributedStyle     = defaultStyle.foreground(AttributedStyle.RED)
-  val helpStyle: AttributedStyle      = defaultStyle.foreground(AttributedStyle.CYAN)
+  val styles: Styles = GlobalConfig.instance.styles
+  val defaultStyle: AttributedStyle   = styles.default.style
+  val debugStyle: AttributedStyle     = styles.debug.style
+  val errorStyle: AttributedStyle     = styles.error.style
+  val helpStyle: AttributedStyle      = styles.help.style
   val helpCNameStyle: AttributedStyle = helpStyle.bold
-  val infoStyle: AttributedStyle      = defaultStyle.foreground(AttributedStyle.MAGENTA)
-  val jsStyle: AttributedStyle        = defaultStyle.foreground(AttributedStyle.CYAN)
+  val infoStyle: AttributedStyle      = styles.info.style
+  val jsStyle: AttributedStyle        = styles.javaScript.style
 
   @inline def printRichDebug(message: String)
                               (implicit terminal: Terminal): Unit = {

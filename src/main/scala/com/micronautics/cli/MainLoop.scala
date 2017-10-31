@@ -4,9 +4,6 @@ import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.ethereum._
 import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
-import com.typesafe.config.ConfigFactory
-import io.circe.config.syntax._
-import io.circe.generic.auto._
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.reader.impl.DefaultParser
@@ -14,17 +11,7 @@ import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, Pars
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
-case class GlobalConfig(productName: String)
-
 object MainLoop {
-  lazy val globalConfig: GlobalConfig = ConfigFactory.load.as[GlobalConfig]("cliLoop") match {
-    case Left(error) =>
-      System.err.println("Configuration error: " + error.getMessage)
-      sys.exit(0)
-
-    case Right(config) => config
-  }
-
   implicit lazy val parser: DefaultParser = new DefaultParser
   parser.setEofOnUnclosedQuote(true)
 
@@ -175,13 +162,14 @@ class MainLoop(val shell: Shell) extends ShellLike {
   }
 
   protected def prompt: String = {
+    import GlobalConfig.instance.productName
     val asBuilder = new AttributedStringBuilder
     val topShell = shellManager.topShell
     if (!TerminalCapabilities.supportsAnsi)
-      asBuilder.append(s"${ globalConfig.productName }$safeGitBranch ${ topShell.prompt }> ")
+      asBuilder.append(s"$productName$safeGitBranch ${ topShell.prompt }> ")
     else asBuilder
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))
-           .append(globalConfig.productName)
+           .append(productName)
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW))
            .append(safeGitBranch)
            .style(AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN))

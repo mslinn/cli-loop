@@ -4,7 +4,7 @@ import java.util.{HashMap => JHashMap, HashSet => JHashSet, Map => JMap, Set => 
 import org.jline.utils.InfoCmp
 import org.jline.utils.InfoCmp.Capability
 
-// Could call `AttributedString.stripAnsi(string)` throughout if no color
+// Could call `AttributedString.stripAnsi(string)` throughout if ansi is not supported
 object TerminalCapabilities {
   val infoCmp: String = InfoCmp.getLoadedInfoCmp("ansi")
   val stringCapabilities: JHashMap[Capability, String] = new JHashMap
