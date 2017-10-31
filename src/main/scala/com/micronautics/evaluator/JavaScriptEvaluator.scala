@@ -37,11 +37,8 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
           case x: java.lang.Double  => Double.unbox(x)
           case x: java.lang.Float   => Float.unbox(x)
           case x: java.lang.Integer => Int.unbox(x)
-          case x: AnyRef =>
-            println(s"x=$x")
-            x
+          case x: AnyRef => x
         }
-        printRichInfo(s"$result\n")
         result.asInstanceOf[AnyRef]
       }
     } catch {

@@ -133,7 +133,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
             exitShell()
 
           case _ =>
-            printRichDebug(s"About to send '$line' to the '${ topShell.prompt }' shell for parsing.")
+//            printRichDebug(s"About to send '$line' to the '${ topShell.prompt }' shell for parsing.")
             topShell.input(line)
           }
         }
