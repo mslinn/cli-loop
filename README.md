@@ -1,16 +1,11 @@
-# Beth - A Better Command Line Interface to Ethereum
+# cli-loop
 
-<img src='https://raw.githubusercontent.com/mslinn/beth/gh-pages/images/queenElizabeth.jpg' align='right' width='33%'>
-
-[![Build Status](https://travis-ci.org/mslinn/beth.svg?branch=master)](https://travis-ci.org/mslinn/beth)
-[![GitHub version](https://badge.fury.io/gh/mslinn%2Fbeth.svg)](https://badge.fury.io/gh/mslinn%2Fbeth)
-
-Beth is a command-line for Ethereum, like eth and geth, but written in Scala.
-Beth stands for "Better ETH"; it features auto-completion and colored help information.
+[![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
+[![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
 ## Running the Program
 The `bin/run` Bash script assembles this project into a fat jar and runs it.
-Sample usage, which runs the `Beth` entry point in `src/main/scala/Beth.scala`:
+Sample usage, which runs the `src/main/scala/com/micronautics/Main.scala` entry point:
 
 ```
 $ bin/run
@@ -23,10 +18,10 @@ Use it after modifying the source code.
 $ bin/run -j
 ```
 
-## Published Binary Executables
-Yes, this is the plan.
-Wanna help make it happen?
-Jump in and submit a pull request!
+You can specify an arbitrary entry point.
+```
+$ bin/run com.micronautics.Main
+```
 
 ## Developers
 The `bin/rerun` script is handy when you want to see the changes made to the running program.
