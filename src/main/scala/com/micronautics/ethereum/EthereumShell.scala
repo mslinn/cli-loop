@@ -14,10 +14,10 @@ object EthereumShell {
     "account",
     helpMessage = "Ethereum account management",
     children =  CNodes(
-      CNode("import", helpMessage = "TODO what does this do?", children = CNodes(CNode("<keyfile>"))),
+      CNode("import", helpMessage = "Import a private key into a new account", children = CNodes(CNode("<keyfile>"))),
       CNode("list",   helpMessage = "List Ethereum accounts"),
       CNode("new",    helpMessage = "Create a new Ethereum account"),
-      CNode("update", helpMessage = "TODO what does this do?", children = CNodes(CNode("<accountAddress>")))
+      CNode("update", helpMessage = "Update an existing account", children = CNodes(CNode("<accountAddress>")))
     )
   )
 
@@ -76,8 +76,9 @@ class EthereumShell extends Shell(
   import MainLoop._
   import EthereumShell._
 
-  def input(line: String): Unit = {
+  def eval(line: String): Unit = {
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
+    println(s"parsedLine.word = ${ parsedLine.word }")
     parsedLine.word match {
       case accountCNode.name => account(parsedLine)
 

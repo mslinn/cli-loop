@@ -141,8 +141,7 @@ class MainLoop(val shell: Shell) extends ShellLike {
           case _: EndOfFileException =>
             val (nextShell, shellStack) = ShellManager.shellStack.pop()
             if (shellStack.isEmpty) {
-                printRichInfo("\nExit")
-                System.exit(0)
+              exit()
             } else {
               activeShell = nextShell
               printRichInfo(s"Returning to ${ activeShell.prompt }.\n")
@@ -158,12 +157,20 @@ class MainLoop(val shell: Shell) extends ShellLike {
         if (trigger.exists(line.compareTo(_) == 0))
           line = reader.readLine("password> ", mask)
 
-        if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit"))
+        if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
           more = false
-
-        activeShell.evaluator.eval(line)
+        } else {
+          println(s"About to send '$line' to the '${ activeShell.prompt }' evaluator")
+          activeShell.evaluator.eval(line)
+        }
       }
     }
+  }
+
+  protected def exit(): Unit = {
+    printRichInfo("\nExit")
+    // todo clean up - one day close the console log
+    System.exit(0)
   }
 
   protected def safeGitBranch: String = {
