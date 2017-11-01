@@ -1,4 +1,4 @@
-package com.micronautics.ethereum
+package com.micronautics.shell
 
 import com.micronautics.cli.MainLoop.terminal
 import com.micronautics.cli.{CNodes, MainLoop, Shell}
@@ -13,7 +13,7 @@ class JavaScriptShell extends Shell(
   cNodes = CNodes.empty,
   evaluator = MainLoop.jsEvaluator
 ) {
-  def input(line: String): Unit = printRichInfo(s"${ evaluator.eval(line)}\n")
+  def input(line: String): Unit = evaluator.eval(line).foreach(x =>printRichInfo(s"$x\n"))
 
   def topHelpMessage: String = s"${ MainLoop.jsEvaluator.info }${ evaluator.status }"
 }

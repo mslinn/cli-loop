@@ -1,4 +1,4 @@
-package com.micronautics.ethereum
+package com.micronautics.shell
 
 import java.util.{Map => JMap}
 import com.micronautics.cli._
@@ -66,12 +66,12 @@ object EthereumShell {
 }
 
 class EthereumShell extends Shell(
-  prompt = "ethereum",
+  prompt = "shell",
   cNodes = EthereumShell.cNodes,
   evaluator = MainLoop.ethereumEvaluator
 ) {
   import com.micronautics.cli.MainLoop._
-  import com.micronautics.ethereum.EthereumShell._
+  import com.micronautics.shell.EthereumShell._
   import com.micronautics.terminal.TerminalStyles._
 
   val topHelpMessage = s"Micronautics Research Ethereum Shell v${ GlobalConfig.instance.version }"
@@ -85,7 +85,7 @@ class EthereumShell extends Shell(
 
       case javaScriptCNode.name =>
         shellManager.shellStack.push(jsShell)
-        printRichInfo(s"Entering the ${ jsShell.prompt } subshell. Press Control-d to exit the subshell.\n")
+        printRichInfo(s"Entering the ${ jsShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case passwordCNode.name => password(parsedLine)
 

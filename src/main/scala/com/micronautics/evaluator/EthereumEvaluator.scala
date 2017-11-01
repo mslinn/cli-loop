@@ -7,7 +7,7 @@ class EthereumEvaluator extends Evaluator {
     info
   }
 
-  def eval(text: String): AnyRef = "TODO implement EthereumEvaluator.eval()"
+  def eval(text: String): Option[AnyRef] = Some("TODO implement EthereumEvaluator.eval()")
 
   override def setup(): Evaluator = {
     // todo perform any configuration
@@ -26,6 +26,6 @@ class EthereumEvaluator extends Evaluator {
     engineVersion = "Ethereum library version goes here",
     evaluatorName = "Ethereum library name goes here",
     evaluatorVersion = s"Ethereum library version goes here | Micronautics v0.1.0",
-    names = List("ethereum", "eth")
+    names = List("shell", "eth")
   )
 }

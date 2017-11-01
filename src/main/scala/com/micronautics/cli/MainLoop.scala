@@ -1,7 +1,7 @@
 package com.micronautics.cli
 
 import com.micronautics.terminal.TerminalStyles._
-import com.micronautics.ethereum._
+import com.micronautics.shell._
 import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
 import org.eclipse.jgit.lib.Repository

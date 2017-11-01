@@ -11,7 +11,7 @@ trait Evaluator {
     * the results of the evaluation are returned verbatim
     * @param text normally contains an entire user string, unparsed
     * @return result from evaluator */
-  def eval(text: String): AnyRef
+  def eval(text: String): Option[AnyRef]
 
   def setup(): Evaluator
 

@@ -14,6 +14,10 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
     if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
     else new ScriptEngineManager()
 
+  lazy val scriptEngine: ScriptEngine = getScriptEngine("JavaScript")
+  lazy val engineContext: ScriptContext = scriptEngine.getContext
+  lazy val bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
+
   lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
 
 
@@ -28,35 +32,49 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   }
 
   /** User input is passed to the `JavaScriptEvaluator` `Evaluator` subclass */
-  def eval(string: String): AnyRef =
+  def eval(string: String): Option[AnyRef] =
     try {
       _linesInput = _linesInput + 1
       if (null==scriptEngine) {
         scriptEngineOk
-        ""
+        None
       } else {
-        val globalValue = scriptEngine.eval(string, bindingsGlobal)
-//        val engineValue = scriptEngine.eval(string, bindingsEngine)
-        val result: Any = globalValue match {
-          case x: java.lang.Boolean => Boolean.unbox(x)
-          case x: java.lang.Double  => Double.unbox(x)
-          case x: java.lang.Float   => Float.unbox(x)
-          case x: java.lang.Integer => Int.unbox(x)
-          case x: AnyRef => x
+        val value = scriptEngine.eval(string, bindingsEngine)
+        val result: Any = value match {
+          case x: java.lang.Boolean => Some(Boolean.unbox(x))
+          case x: java.lang.Double  => Some(Double.unbox(x))
+          case x: java.lang.Float   => Some(Float.unbox(x))
+          case x: java.lang.Integer => Some(Int.unbox(x))
+          case x: AnyRef => Some(x)
+          case x if x == null => None
+          case x => Some(x.toString) // this is the only way to return something like this
         }
-        result.asInstanceOf[AnyRef]
+        result.asInstanceOf[Option[AnyRef]]
       }
     } catch {
+      case e: NullPointerException =>
+        printRichError(s"Error: ${ e.getMessage }")
+        None
+
       case e: ScriptException =>
         printRichError(s"Error on line ${ e.getLineNumber }, column ${ e.getColumnNumber}: ${ e.getMessage }")
-        e
+        None
 
       case e: Exception =>
-        printRichError(s"JavaScriptEvaluator.eval - ${ e.getCause }, ${ e.getMessage } ${ e.getStackTrace.mkString("\n") }")
-        e
+        val cause: String = {
+          val x = e.getCause.getMessage
+          if (x.nonEmpty) s"cause: $x, " else ""
+        }
+        val message: String = {
+          val x = e.getMessage
+          if (x.nonEmpty) s"$x, " else ""
+        }
+        val stackTrace = e.getStackTrace.mkString("\n")
+        printRichError(s"JavaScript evaluation error: $cause $message $stackTrace")
+        None
     }
-
-  def get(name: String): AnyRef = bindingsGlobal.get(name)
+x
+  def get(name: String): AnyRef = bindingsEngine.get(name)
 
   def info = EvaluatorInfo(
     engineName       = factory.getEngineName,
@@ -66,26 +84,22 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
     names            = factory.getNames.asScala.toList
   )
 
-  def isDefined(name: String): Boolean = bindingsGlobal.containsKey(name)
+  def isDefined(name: String): Boolean = bindingsEngine.containsKey(name)
 
   /** All numbers in JavaScriptEvaluator are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
     * JavaScriptEvaluator does not have integers, so before an `Int` can be provided to the `value` parameter
     * it is first implicitly converted to `Double`. */
   def put(name: String, value: AnyVal): AnyRef = {
-    bindingsGlobal.put(name, value)
-    val retrieved: AnyRef = bindingsGlobal.get(name)
+    bindingsEngine.put(name, value)
+    val retrieved: AnyRef = bindingsEngine.get(name)
     retrieved
   }
 
   /** This JavaScriptEvaluator interpreter maintains state throughout the life of the program.
     * Multiple `eval()` invocations accumulate state. */
-  def scriptEngine: ScriptEngine =
-    Option(scriptEngineManager.getEngineByName("JavaScript")).map { engine =>
-      val bindings: javax.script.Bindings = engine.createBindings
-      engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE)
-      engine
-    }.getOrElse {
-      throw new Exception("Error: JavaScript engine not available.")
+  def getScriptEngine(engineName: String): ScriptEngine =
+    Option(scriptEngineManager.getEngineByName(engineName)).getOrElse {
+      throw new Exception(s"Error: $engineName engine not available.")
     }
 
   def scriptEngineFactories: List[ScriptEngineFactory] = {
@@ -104,8 +118,6 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   }
 
   def scopeKeysEngine: Set[String] = bindingsEngine.keySet.asScala.toSet
-
-  def scopeKeysGlobal: Set[String] = bindingsGlobal.keySet.asScala.toSet
 
   /** Initialize JavaScriptEvaluator instance */
   def setup(): Evaluator = {
@@ -148,7 +160,5 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
     super.shutdown()
   }
 
-  protected[evaluator] def bindingsEngine: Bindings = scriptEngine.getBindings(ScriptContext.ENGINE_SCOPE)
-
-  protected[evaluator] def bindingsGlobal: Bindings = scriptEngine.getBindings(ScriptContext.GLOBAL_SCOPE)
+  protected[evaluator] def bindingsEngine: Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
 }
