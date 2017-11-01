@@ -1,5 +1,7 @@
 # cli-loop
 
+<img src='https://raw.githubusercontent.com/mslinn/cli-loop/gh-pages/images/cliLoop.png' align='right' width='33%'>
+
 [![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
