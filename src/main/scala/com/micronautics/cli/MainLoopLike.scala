@@ -3,7 +3,7 @@ package com.micronautics.cli
 import com.micronautics.terminal.TerminalCapabilities
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
 
-trait ShellLike {
+trait MainLoopLike {
   val cNodes: CNodes
 
   /* @return length of longest command / alias combination */
