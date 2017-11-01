@@ -73,7 +73,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
         printRichError(s"JavaScript evaluation error: $cause $message $stackTrace")
         None
     }
-x
+
   def get(name: String): AnyRef = bindingsEngine.get(name)
 
   def info = EvaluatorInfo(
