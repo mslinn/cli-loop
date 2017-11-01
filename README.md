@@ -6,14 +6,14 @@
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
 ## Running the Program
-The `bin/run` Bash script assembles this project into a fat jar and runs it.
+The `bin/run` Bash script assembles this project into path fat jar and runs it.
 Sample usage, which runs the `src/main/scala/com/micronautics/Main.scala` entry point:
 
 ```
 $ bin/run
 ```
 
-The `-j` option forces a rebuild of the fat jar.
+The `-j` option forces path rebuild of the fat jar.
 Use it after modifying the source code.
 
 ```

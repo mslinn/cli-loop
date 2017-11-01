@@ -70,5 +70,3 @@ initialCommands in console := """val js: com.micronautics.cli.JavaScriptEvaluato
                                 |""".stripMargin
 
 cancelable := true
-
-sublimeTransitive := true

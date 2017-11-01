@@ -13,9 +13,9 @@ object EthereumShell {
     "account",
     helpMessage = "Ethereum account management",
     children =  CNodes(
-      CNode("import", helpMessage = "Import a private key into a new account", children = CNodes(CNode("<keyfile>"))),
+      CNode("import", helpMessage = "Import path private key into path new account", children = CNodes(CNode("<keyfile>"))),
       CNode("list",   helpMessage = "List Ethereum accounts"),
-      CNode("new",    helpMessage = "Create a new Ethereum account"),
+      CNode("new",    helpMessage = "Create path new Ethereum account"),
       CNode("update", helpMessage = "Update an existing account", children = CNodes(CNode("<accountAddress>")))
     )
   )
@@ -33,7 +33,7 @@ object EthereumShell {
 
   lazy val setCNode = CNode(
     "set",
-    helpMessage = s"Set a terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'",
+    helpMessage = s"Set path terminal variable, such as '${ LineReader.PREFER_VISIBLE_BELL }'",
     children = CNodes(
       CNode("name", helpMessage="TODO what does this do?"), CNode("<newValue>")
     )
@@ -41,13 +41,13 @@ object EthereumShell {
 
   lazy val testKeyCNode = CNode(
     "testkey",
-    helpMessage = "Test a key binding",
+    helpMessage = "Test path key binding",
     children = CNodes(CNode("<key>"))
   )
 
   lazy val tPutCNode = CNode(
     "tput",
-    helpMessage="Demonstrate a terminal capability, such as 'bell'",
+    helpMessage="Demonstrate path terminal capability, such as 'bell'",
     children = CNodes(CNode("bell"))
   )
 

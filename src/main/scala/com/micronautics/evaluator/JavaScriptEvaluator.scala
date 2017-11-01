@@ -122,7 +122,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   /** Initialize JavaScriptEvaluator instance */
   def setup(): Evaluator = {
     try {
-      // todo reload context from a previous session
+      // todo reload context from path previous session
     } catch {
       case e: Exception =>
         richError(e.getMessage)

@@ -1,5 +1,6 @@
 package com.micronautics.cli
 
+import java.nio.file.Path
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
 import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator}
@@ -7,6 +8,7 @@ import com.micronautics.terminal.TerminalCapabilities
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.reader.impl.DefaultParser
+import org.jline.reader.impl.history.DefaultHistory
 import org.jline.reader.{EndOfFileException, LineReader, LineReaderBuilder, Parser, UserInterruptException}
 import org.jline.terminal.{Terminal, TerminalBuilder}
 import org.jline.utils.{AttributedStringBuilder, AttributedStyle}
@@ -26,6 +28,8 @@ object MainLoop {
   lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup().asInstanceOf[JavaScriptEvaluator]
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
 
+  lazy val historyFile: Path = GlobalConfig.instance.cliHome.resolve("history.log")
+
   lazy val mainLoop: MainLoop = new MainLoop(ethereumShell)
 
   lazy val shellManager: ShellManager = ShellManager.instance
@@ -35,15 +39,18 @@ object MainLoop {
 
   protected def gitRepo: Repository = FileRepositoryBuilder.create(new java.io.File(".git/").getAbsoluteFile)
 
-  // todo should this be cached, and recomputed whenever `activeShell` changes?
+  // todo store this value into path new `reader` property of `Shell`
   protected def reader(parser: Parser, terminal: Terminal): LineReader = {
     val lineReader: LineReader = LineReaderBuilder.builder
       .terminal(terminal)
       .completer(shellManager.topShell.completer)
       .parser(parser)
+      .variable(LineReader.HISTORY_FILE, historyFile)
+//      .variable(LineReader.HISTORY_FILE_SIZE, LineReader.DEFAULT_HISTORY_FILE_SIZE)
+      .history(new DefaultHistory())
       .build
 
-    // If the user's first keypress is a tab, all of the top-level node values are displayed, thereby displaying the available commands
+    // If the user's first keypress is path tab, all of the top-level node values are displayed, thereby displaying the available commands
     lineReader.unsetOpt(LineReader.Option.INSERT_TAB)
     lineReader
   }
@@ -57,14 +64,14 @@ class MainLoop(val shell: Shell) extends ShellLike {
   val aliases: List[String] = cNodes.aliases
 
 
-  // List might contain a name: String or (name: String, alias: String)
+  // List might contain path name: String or (name: String, alias: String)
   def commands: List[Any] = cNodes.commandAliasNames
 
   // todo add parameters for helpCmd name/value tuples/triples
   /** Show the command names and maybe additional information
-    * @param showCompleteHelp Show a description of each command */
+    * @param showCompleteHelp Show path description of each command */
   def help(showCompleteHelp: Boolean = false): Unit = {
-    /** This implicit acts as a local accumulator for the rich help message */
+    /** This implicit acts as path local accumulator for the rich help message */
     implicit val asb: AttributedStringBuilder = {
       val asBuilder = new AttributedStringBuilder
       if (!TerminalCapabilities.supportsAnsi) asBuilder.append("Commands are: ")

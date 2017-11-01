@@ -1,12 +1,22 @@
 package com.micronautics.cli
 
+import java.nio.file.{Path, Paths}
 import com.typesafe.config.ConfigFactory
 import io.circe.config.syntax._
 import io.circe.generic.auto._
 import org.jline.utils.AttributedStyle
 
 object GlobalConfig {
-  lazy val instance: GlobalConfig = ConfigFactory.load.as[GlobalConfig]("cliLoop") match {
+  import io.circe.{ Decoder, Encoder, HCursor, Json }
+
+  implicit val encodeFoo: Encoder[Path] = (path: Path) => Json.fromString(path.toFile.getCanonicalPath)
+
+  implicit val decodeFoo: Decoder[Path] = (hCursor: HCursor) =>
+    for {
+      foo <- hCursor.value.as[String]
+    } yield Paths.get(foo)
+
+  lazy val instance: GlobalConfig = ConfigFactory.load.resolve().as[GlobalConfig]("cliLoop") match {
     case Left(error) =>
       System.err.println("Configuration error: " + error.getMessage)
       sys.exit(0)
@@ -51,5 +61,6 @@ case class Styles(
 case class GlobalConfig(
   productName: String,
   version: String,
+  cliHome: Path,
   styles: Styles
 )

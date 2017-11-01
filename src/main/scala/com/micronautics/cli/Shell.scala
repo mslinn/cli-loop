@@ -5,7 +5,7 @@ import org.jline.builtins.Completers.TreeCompleter.Node
 import org.jline.reader.Completer
 
 /** Contains properties that define shell instances, for example the prompt, help message,
-  * maximum command verb length, and a Map of function name to function for each command */
+  * maximum command verb length, and path Map of function name to function for each command */
 abstract case class Shell(
   prompt: String,
   cNodes: CNodes,
