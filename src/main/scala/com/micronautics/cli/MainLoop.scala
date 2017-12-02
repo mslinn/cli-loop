@@ -3,7 +3,7 @@ package com.micronautics.cli
 import java.nio.file.Path
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
-import com.micronautics.evaluator.{EthereumEvaluator, GroovyEvaluator, JavaScriptEvaluator, JythonEvaluator}
+import com.micronautics.evaluator.{EthereumEvaluator, GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
@@ -30,6 +30,9 @@ object MainLoop {
 
   lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
+
+  lazy val jrubyEvaluator: JRubyEvaluator = new JRubyEvaluator().setup()
+  lazy val jrubyShell: JRubyShell = new JRubyShell
 
   lazy val jythonEvaluator: JythonEvaluator = new JythonEvaluator().setup()
   lazy val jythonShell: JythonShell = new JythonShell

@@ -1,7 +1,7 @@
 package com.micronautics.cli
 
 import javax.script.{Invocable, ScriptEngineFactory}
-import com.micronautics.evaluator.{GroovyEvaluator, JavaScriptEvaluator, JythonEvaluator}
+import com.micronautics.evaluator.{GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator}
 import org.junit.runner.RunWith
 import org.python.core.{PyObject, PySystemState, PyType}
 import org.scalatest.Matchers._
@@ -23,12 +23,12 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
       groovy.scriptEngine.getFactory.getLanguageName shouldBe "Groovy"
 
       groovy.isDefined("ten")   shouldBe false
-      groovy.put("ten", 10)     shouldBe 10.0
-      groovy.get("ten")         shouldBe 10.0
+      groovy.put("ten", 10)     shouldBe 10
+      groovy.get("ten")         shouldBe 10
       groovy.isDefined("ten")   shouldBe true
 
-      groovy.put("twenty", 20)  shouldBe 20.0
-      groovy.get("twenty")      shouldBe 20.0
+      groovy.put("twenty", 20)  shouldBe 20
+      groovy.get("twenty")      shouldBe 20
 
       val Some(sum) = groovy.eval("(1..10).sum()")
       sum shouldBe 55
@@ -44,9 +44,6 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
 //      groovy.eval("twelve * 2") shouldBe Some(24)
       twelve shouldBe 12
 //      groovy.get("twelve")      shouldBe 12
-
-      groovy.put("y", 99)       shouldBe 99
-      groovy.get("y")           shouldBe 99
     }
   }
 
@@ -70,26 +67,58 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
         val _: PyObject = moduleType.getDict
       }
 
-      val xValue: Object = jython.get("x")
-      println("x: " + xValue)
-
       jython.isDefined("ten")   shouldBe false
-      jython.put("ten", 10)     shouldBe 10.0
-      jython.get("ten")         shouldBe 10.0
+      jython.put("ten", 10)     shouldBe 10
+      jython.get("ten")         shouldBe 10
       jython.isDefined("ten")   shouldBe true
 
-      jython.put("twenty", 20)  shouldBe 20.0
-      jython.get("twenty")      shouldBe 20.0
+      jython.put("twenty", 20)  shouldBe 20
+      jython.get("twenty")      shouldBe 20
 
       jython.eval("twelve = ten + 2")
-      jython.get("twelve")      shouldBe 12.0
-
-      jython.eval("twelve")     shouldBe Some(12.0)
-      jython.eval("twelve * 2") shouldBe Some(24)
       jython.get("twelve")      shouldBe 12
 
-      jython.put("y", 99)       shouldBe 99
-      jython.get("y")           shouldBe 99
+      jython.eval("twelve")     shouldBe Some(12)
+      jython.eval("twelve * 2") shouldBe Some(24)
+      jython.get("twelve")      shouldBe 12
+    }
+  }
+
+  "JRubyEvaluator" should {
+    "work" in {
+      val jruby = new JRubyEvaluator(useClassloader = false)
+
+      jruby.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = jruby.scriptEngineFactories
+      engineFactories.size should be > 0
+
+      jruby.showEngineFactories(engineFactories)
+      jruby.scriptEngine should not be null
+      jruby.scriptEngine.getFactory.getLanguageName shouldBe "ruby"
+
+      jruby.isDefined("ten")   shouldBe false
+      jruby.put("ten", 10)     shouldBe 10
+      jruby.get("ten")         shouldBe 10
+      jruby.isDefined("ten")   shouldBe true
+
+      jruby.put("twenty", 20)  shouldBe 20
+      jruby.get("twenty")      shouldBe 20
+
+      // Seems to define a new variable, but that variable is not added to bindings.
+      // The new value is returned fine, however
+      val Some(twelve) = jruby.eval("twelve = 12")
+      twelve                   shouldBe 12
+//      jruby.get("twelve")      shouldBe 12 // Not bound, so fails
+
+      //jruby.eval("twelve = ten + 2")  // NameError: undefined local variable or method `ten' for main:Object
+//      Did you mean?  test
+//        <main> at <script>:1
+
+//      jruby.get("twelve")      shouldBe 12  // Fails, unlike Nashorn and Jython JSR223 implementations
+
+//      jruby.eval("twelve")     shouldBe Some(12) // twelve is not bound
+//      jruby.eval("twelve * 2") shouldBe Some(24)
+//      jruby.get("twelve")      shouldBe 12
     }
   }
 

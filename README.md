@@ -5,12 +5,19 @@
 [![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
-Supports Groovy, JavaScript and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
+Supports Groovy, JavaScript, JRuby and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
 All scripts can share variables with Java and Scala code.
 
-Warning: Groovy's implementation of JSR223's `eval` method does not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings.
+## Not all JSR233 Implementations are Useful
+Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
+which means that you do not see the results of computations in the REPL.
+This problem renders those implementations of JSR233 useless for most applications.
+
+Groovy's JSR233 implementation suffers from this issue.
 `put` and `get` work, however.
 I filed issue [GROOVY-8400](https://issues.apache.org/jira/browse/GROOVY-8400).
+
+JRuby's JSR223 implementation is worse than Groovy's.
       
 ## Running the Program
 The `bin/run` Bash script assembles this project into path fat jar and runs it.
@@ -42,7 +49,7 @@ The debug setup persists each time `rerun` relaunches the program.
 
 ```
 1. Waiting for source changes... (press enter to interrupt)
-Micronautics Research Ethereum Shell v0.2.1
+Micronautics Research Ethereum Shell v0.2.3
 Commands are: account, bindkey, exit/^d, help/?, javascript, jython, password, set, testkey and tput
 cli-loop [master] shell> javascript
 Entering the javascript subshell. Press Control-d to exit the subshell.

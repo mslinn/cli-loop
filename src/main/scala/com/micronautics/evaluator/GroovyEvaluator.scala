@@ -1,7 +1,14 @@
 package com.micronautics.evaluator
 
-/** Unsure what this means, or what to do:
+/** {{{
+  * Engine name      = Groovy Scripting Engine
+  * Engine version   = 2.0
+  * Language name    = Groovy
+  * Language version = 2.4.13
+  * Names that can be used to retrieve this engine = groovy, Groovy
+  * }}}
   *
+  * Unsure what this means, or what to do:
   * "The engine keeps per default hard references to the script functions.
   * To change this you should set a engine level scoped attribute to the script context of the name #jsr223.groovy.engine.keep.globals
   * with a String being phantom to use phantom references, weak to use weak references or soft to use soft references -

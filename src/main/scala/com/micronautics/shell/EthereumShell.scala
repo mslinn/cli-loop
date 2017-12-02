@@ -28,6 +28,8 @@ object EthereumShell {
 
   lazy val javaScriptCNode = CNode("javascript", helpMessage="Enter JavaScriptEvaluator console")
 
+  lazy val jrubyCNode = CNode("jruby", helpMessage="Enter JRubyEvaluator console")
+
   lazy val jythonCNode = CNode("jython", helpMessage="Enter JythonEvaluator console")
 
   // todo display help when this is chosen
@@ -96,6 +98,10 @@ class EthereumShell extends Shell(
       case javaScriptCNode.name =>
         shellManager.shellStack.push(jsShell)
         printRichInfo(s"Entering the ${ jsShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
+
+      case jrubyCNode.name =>
+        shellManager.shellStack.push(jrubyShell)
+        printRichInfo(s"Entering the ${ jrubyShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case jythonCNode.name =>
         shellManager.shellStack.push(jythonShell)
