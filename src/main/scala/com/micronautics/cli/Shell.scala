@@ -6,10 +6,10 @@ import org.jline.reader.Completer
 
 /** Contains properties that define shell instances, for example the prompt, help message,
   * maximum command verb length, and path Map of function name to function for each command */
-abstract case class Shell(
+abstract case class Shell[T](
   prompt: String,
   cNodes: CNodes,
-  evaluator: Evaluator
+  evaluator: Evaluator[T]
 ) {
   lazy val completeHelpMessage: String = s"$topHelpMessage\n\n${ cNodes.completeHelpMessage }"
 

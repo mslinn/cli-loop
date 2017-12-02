@@ -1,6 +1,6 @@
 package com.micronautics.evaluator
 
-trait Evaluator {
+trait Evaluator[T] {
   var _linesInput: Int = 0
   var _lastErrorInputLine: Option[Int] = None
   var _lastErrorMessage: Option[String] = None
@@ -13,7 +13,7 @@ trait Evaluator {
     * @return result from evaluator */
   def eval(text: String): Option[AnyRef]
 
-  def setup(): Evaluator
+  def setup(): T
 
   def shutdown(): EvaluatorStatus = EvaluatorStatus(
     linesInput = _linesInput,

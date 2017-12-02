@@ -3,8 +3,9 @@ package com.micronautics.cli
 import java.nio.file.Path
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
-import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator, JythonEvaluator}
+import com.micronautics.evaluator.{EthereumEvaluator, GroovyEvaluator, JavaScriptEvaluator, JythonEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
+import groovy.lang.GroovyShell
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.reader.impl.DefaultParser
@@ -22,8 +23,11 @@ object MainLoop {
       .system(true)
       .build
 
-  lazy val ethereumEvaluator: Evaluator = new EthereumEvaluator().setup()
+  lazy val ethereumEvaluator: EthereumEvaluator = new EthereumEvaluator().setup()
   lazy val ethereumShell: EthereumShell = new EthereumShell
+
+  lazy val groovyEvaluator: GroovyEvaluator = new GroovyEvaluator().setup().asInstanceOf[GroovyEvaluator]
+  lazy val groovyShell: GroovyShell = new GroovyShell
 
   lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup().asInstanceOf[JavaScriptEvaluator]
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
@@ -59,7 +63,7 @@ object MainLoop {
   }
 }
 
-class MainLoop(val shell: Shell) extends MainLoopLike {
+class MainLoop(val shell: Shell[_]) extends MainLoopLike {
   import com.micronautics.cli.MainLoop._
 
   val cNodes: CNodes = shell.cNodes
@@ -117,6 +121,7 @@ class MainLoop(val shell: Shell) extends MainLoopLike {
   }
 
   protected def exitShell(): Unit = {
+    import scala.language.existentials
     val (nextShell, shellStack) = ShellManager.shellStack.pop()
     if (shellStack.isEmpty) {
       exit()

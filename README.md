@@ -5,8 +5,12 @@
 [![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
-Supports JavaScript and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
+Supports Groovy, JavaScript and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
 
+Warning: Groovy's implementation of JSR223's `eval` method does not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings.
+`put` and `get` work, however.
+I filed issue [GROOVY-8400](https://issues.apache.org/jira/browse/GROOVY-8400).
+      
 ## Running the Program
 The `bin/run` Bash script assembles this project into path fat jar and runs it.
 Sample usage, which runs the `src/main/scala/com/micronautics/Main.scala` entry point:
@@ -37,7 +41,7 @@ The debug setup persists each time `rerun` relaunches the program.
 
 ```
 1. Waiting for source changes... (press enter to interrupt)
-Micronautics Research Ethereum Shell v0.2.0
+Micronautics Research Ethereum Shell v0.2.1
 Commands are: account, bindkey, exit/^d, help/?, javascript, jython, password, set, testkey and tput
 cli-loop [master] shell> javascript
 Entering the javascript subshell. Press Control-d to exit the subshell.

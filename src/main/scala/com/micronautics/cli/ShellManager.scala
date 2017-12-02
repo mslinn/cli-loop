@@ -13,5 +13,5 @@ class ShellManager {
 
   def nonEmpty: Boolean = shellStack.nonEmpty
 
-  def topShell: Shell = shellStack.top
+  def topShell: Shell[_] = shellStack.top
 }

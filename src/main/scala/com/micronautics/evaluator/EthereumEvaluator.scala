@@ -1,6 +1,6 @@
 package com.micronautics.evaluator
 
-class EthereumEvaluator extends Evaluator {
+class EthereumEvaluator extends Evaluator[EthereumEvaluator] {
   override def init(): EvaluatorInfo = {
     // todo perform session initialization
 
@@ -9,7 +9,7 @@ class EthereumEvaluator extends Evaluator {
 
   def eval(text: String): Option[AnyRef] = Some("TODO implement EthereumEvaluator.eval()")
 
-  override def setup(): Evaluator = {
+  override def setup(): EthereumEvaluator = {
     // todo perform any configuration
 
     this
