@@ -1,9 +1,11 @@
-# cli-loop
+# cli-loop - Command-Line JVM Interpreters
 
 <img src='https://raw.githubusercontent.com/mslinn/cli-loop/gh-pages/images/cliLoop.png' align='right' width='33%'>
 
 [![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
+
+Supports JavaScript and Jython interpreters.
 
 ## Running the Program
 The `bin/run` Bash script assembles this project into path fat jar and runs it.
@@ -35,8 +37,8 @@ The debug setup persists each time `rerun` relaunches the program.
 
 ```
 1. Waiting for source changes... (press enter to interrupt)
-Micronautics Research Ethereum Shell v0.1.0
-Commands are: account, bindkey, exit/^d, help/?, javascript, password, set, testkey and tput
+Micronautics Research Ethereum Shell v0.2.0
+Commands are: account, bindkey, exit/^d, help/?, javascript, jython, password, set, testkey and tput
 cli-loop [master] shell> javascript
 Entering the javascript subshell. Press Control-d to exit the subshell.
 

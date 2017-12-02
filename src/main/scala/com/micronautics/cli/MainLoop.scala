@@ -3,7 +3,7 @@ package com.micronautics.cli
 import java.nio.file.Path
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
-import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator}
+import com.micronautics.evaluator.{EthereumEvaluator, Evaluator, JavaScriptEvaluator, JythonEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
@@ -27,6 +27,9 @@ object MainLoop {
 
   lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup().asInstanceOf[JavaScriptEvaluator]
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
+
+  lazy val jythonEvaluator: JythonEvaluator = new JythonEvaluator().setup().asInstanceOf[JythonEvaluator]
+  lazy val jythonShell: JythonShell = new JythonShell
 
   lazy val historyFile: Path = GlobalConfig.instance.cliHome.resolve("history.log")
 

@@ -1,26 +1,22 @@
 package com.micronautics.evaluator
 
-import javax.script.{ScriptEngineFactory, ScriptException}
-import com.micronautics.cli.MainLoop
-import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineManager}
-import com.micronautics.terminal.TerminalStyles._
+import javax.script.{Bindings, ScriptContext, ScriptEngine, ScriptEngineFactory, ScriptEngineManager, ScriptException}
+import com.micronautics.cli.MainLoop._
+import com.micronautics.terminal.TerminalStyles.{printRichError, richError}
 import scala.collection.JavaConverters._
-import MainLoop._
 
-/** @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
-class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
+class JythonEvaluator(useClassloader: Boolean = true) extends Evaluator {
   protected lazy val scriptEngineManager: ScriptEngineManager =
     if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
     else new ScriptEngineManager()
 
-  lazy val scriptEngine: ScriptEngine = getScriptEngine("JavaScript")
+  lazy val scriptEngine: ScriptEngine = new ScriptEngineManager().getEngineByName("python")
   lazy val engineContext: ScriptContext = scriptEngine.getContext
   lazy val bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
 
   lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
 
-
-  def init(): EvaluatorInfo = {
+  override def init(): EvaluatorInfo = {
     _linesInput = 0
     _lastErrorInputLine = None
     _lastErrorMessage = None
@@ -30,7 +26,6 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
     info
   }
 
-  /** User input is passed to the `JavaScriptEvaluator` `Evaluator` subclass */
   def eval(string: String): Option[AnyRef] =
     try {
       _linesInput = _linesInput + 1
@@ -75,6 +70,19 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
 
   def get(name: String): AnyRef = bindingsEngine.get(name)
 
+  /** This JavaScriptEvaluator interpreter maintains state throughout the life of the program.
+      * Multiple `eval()` invocations accumulate state. */
+  def getScriptEngine(engineName: String): ScriptEngine =
+    Option(scriptEngineManager.getEngineByName(engineName)).getOrElse {
+      throw new Exception(s"Error: $engineName engine not available.")
+    }
+
+  /** {{{
+    * Engine name      = jython
+    * Engine version   = 2.7.1
+    * Language name    = python
+    * Language version = 2.7
+    * Names that can be used to retrieve this engine = python, jython }}} */
   def info = EvaluatorInfo(
     engineName       = factory.getEngineName,
     engineVersion    = factory.getEngineVersion,
@@ -84,13 +92,6 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
   )
 
   def isDefined(name: String): Boolean = bindingsEngine.containsKey(name)
-
-  /** This JavaScriptEvaluator interpreter maintains state throughout the life of the program.
-    * Multiple `eval()` invocations accumulate state. */
-  def getScriptEngine(engineName: String): ScriptEngine =
-    Option(scriptEngineManager.getEngineByName(engineName)).getOrElse {
-      throw new Exception(s"Error: $engineName engine not available.")
-    }
 
   /** All numbers in JavaScriptEvaluator are doubles: that is, they are stored as 64-bit IEEE-754 doubles.
     * JavaScriptEvaluator does not have integers, so before an `Int` can be provided to the `value` parameter
@@ -118,8 +119,7 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
     scriptEngineManager.getEngineFactories.asScala.exists(_.getNames.contains("JavaScript"))
   }
 
-  /** Initialize JavaScriptEvaluator instance */
-  def setup(): Evaluator = {
+  override def setup(): Evaluator = {
     try {
       // todo reload context from path previous session
     } catch {
@@ -150,12 +150,11 @@ class JavaScriptEvaluator(useClassloader: Boolean = true) extends Evaluator {
            |Language name    = ${ engine.getLanguageName }
            |Language version = ${ engine.getLanguageVersion }
            |Names that can be used to retrieve this engine = ${ engine.getNames.asScala.mkString(", ") }
-           |""".stripMargin)
+           protected |""".stripMargin)
     }
 
   override def shutdown(): EvaluatorStatus = {
     // todo save session context somehow
-
     super.shutdown()
   }
 
