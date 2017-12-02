@@ -117,10 +117,15 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
 
   def scriptEngineOk: Boolean = {
     if (scriptEngineManager==null) {
-      Console.err.println("\nError: scriptEngineManager is null!")
+      richError("\nError: scriptEngineManager is null!")
       System.exit(0)
     }
-    scriptEngineManager.getEngineFactories.asScala.exists(_.getNames.contains(engineName))
+
+    val factories = scriptEngineManager.getEngineFactories.asScala
+    val exists = factories.exists(_.getNames.contains(engineName))
+    if (!exists)
+      richError(s"Error: Script engine '$engineName' not found. Registered engines are: ${ factories.mkString(", ") }")
+    exists
   }
 
   override def setup(): T = {

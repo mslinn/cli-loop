@@ -102,7 +102,7 @@ case class CNodes(cNodes: CNode*) {
           .style(helpStyle)
           .append(node.helpMessage)
           .style(defaultStyle)
-          .toAnsi
+          .toAnsi(MainLoop.terminal)
       } else s"$paddedName - ${ node.helpMessage }"
     }
 

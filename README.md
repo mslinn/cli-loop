@@ -5,12 +5,13 @@
 [![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
-Supports Groovy, JavaScript, JRuby and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
+Supports Groovy, JavaScript, JRuby, Jython and Kotlin interpreters via 
+[JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
 All scripts can share variables with Java and Scala code.
 
 ## Not all JSR233 Implementations are Useful
-Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
-which means that you do not see the results of computations in the REPL.
+Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the 
+`ScriptContext.ENGINE_SCOPE` bindings, which means that you do not see the results of computations in the REPL.
 This problem renders those implementations of JSR233 useless for most applications.
 
 Groovy's JSR233 implementation suffers from this issue.

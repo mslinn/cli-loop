@@ -3,7 +3,7 @@ package com.micronautics.cli
 import java.nio.file.Path
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
-import com.micronautics.evaluator.{EthereumEvaluator, GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator}
+import com.micronautics.evaluator.{EthereumEvaluator, GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator, KotlinEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
@@ -28,6 +28,8 @@ object MainLoop {
   lazy val groovyEvaluator: GroovyEvaluator = new GroovyEvaluator().setup()
   lazy val groovyShell: ApacheGroovyShell = new ApacheGroovyShell
 
+  lazy val historyFile: Path = GlobalConfig.instance.cliHome.resolve("history.log")
+
   lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
 
@@ -37,7 +39,8 @@ object MainLoop {
   lazy val jythonEvaluator: JythonEvaluator = new JythonEvaluator().setup()
   lazy val jythonShell: JythonShell = new JythonShell
 
-  lazy val historyFile: Path = GlobalConfig.instance.cliHome.resolve("history.log")
+  lazy val kotlinEvaluator: KotlinEvaluator = new KotlinEvaluator().setup()
+  lazy val kotlinShell: KotlinShell = new KotlinShell
 
   lazy val mainLoop: MainLoop = new MainLoop(ethereumShell)
 

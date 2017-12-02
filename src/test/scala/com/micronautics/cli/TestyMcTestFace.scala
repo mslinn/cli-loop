@@ -1,7 +1,7 @@
 package com.micronautics.cli
 
 import javax.script.{Invocable, ScriptEngineFactory}
-import com.micronautics.evaluator.{GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator}
+import com.micronautics.evaluator.{GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator, KotlinEvaluator}
 import org.junit.runner.RunWith
 import org.python.core.{PyObject, PySystemState, PyType}
 import org.scalatest.Matchers._
@@ -151,6 +151,35 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
 
       js.put("y", 99)       shouldBe 99
       js.get("y")           shouldBe 99
+    }
+  }
+
+  "KotlinEvaluator" should {
+    "work" in {
+      val kotlin = new KotlinEvaluator(useClassloader = false)
+
+      kotlin.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = kotlin.scriptEngineFactories
+      engineFactories.size should be > 0
+
+      kotlin.showEngineFactories(engineFactories)
+      kotlin.scriptEngine should not be null
+      kotlin.scriptEngine.getFactory.getLanguageName shouldBe "kotlin"
+
+      kotlin.isDefined("ten")   shouldBe false
+      kotlin.put("ten", 10)     shouldBe 10
+      kotlin.get("ten")         shouldBe 10
+      kotlin.isDefined("ten")   shouldBe true
+
+      kotlin.put("twenty", 20)  shouldBe 20
+      kotlin.get("twenty")      shouldBe 20
+
+      kotlin.eval("twelve = ten + 2")
+      kotlin.get("twelve")      shouldBe 12
+
+      kotlin.eval("twelve")     shouldBe Some(12)
+      kotlin.eval("twelve * 2") shouldBe Some(24)
+      kotlin.get("twelve")      shouldBe 12
     }
   }
 }
