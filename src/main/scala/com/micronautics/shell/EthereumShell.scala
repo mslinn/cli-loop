@@ -24,6 +24,8 @@ object EthereumShell {
 
   lazy val exitCNode = CNode("exit", helpMessage="Display this message", alias="^d") // todo automatically add this CNode
 
+  lazy val groovyCNode = CNode("groovy", helpMessage="Enter GroovyEvaluator console")
+
   lazy val javaScriptCNode = CNode("javascript", helpMessage="Enter JavaScriptEvaluator console")
 
   lazy val jythonCNode = CNode("jython", helpMessage="Enter JythonEvaluator console")
@@ -58,6 +60,7 @@ object EthereumShell {
       accountCNode,
       bindKeyCNode,
       exitCNode,
+      groovyCNode,
       javaScriptCNode,
       jythonCNode,
       helpCNode,
@@ -85,6 +88,10 @@ class EthereumShell extends Shell(
       case accountCNode.name => account(parsedLine)
 
       case bindKeyCNode.name => bindKey(parsedLine)
+
+      case groovyCNode.name =>
+        shellManager.shellStack.push(groovyShell)
+        printRichInfo(s"Entering the ${ groovyShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case javaScriptCNode.name =>
         shellManager.shellStack.push(jsShell)

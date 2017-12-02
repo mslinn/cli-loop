@@ -5,7 +5,6 @@ import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
 import com.micronautics.evaluator.{EthereumEvaluator, GroovyEvaluator, JavaScriptEvaluator, JythonEvaluator}
 import com.micronautics.terminal.TerminalCapabilities
-import groovy.lang.GroovyShell
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.jline.reader.impl.DefaultParser
@@ -26,13 +25,13 @@ object MainLoop {
   lazy val ethereumEvaluator: EthereumEvaluator = new EthereumEvaluator().setup()
   lazy val ethereumShell: EthereumShell = new EthereumShell
 
-  lazy val groovyEvaluator: GroovyEvaluator = new GroovyEvaluator().setup().asInstanceOf[GroovyEvaluator]
-  lazy val groovyShell: GroovyShell = new GroovyShell
+  lazy val groovyEvaluator: GroovyEvaluator = new GroovyEvaluator().setup()
+  lazy val groovyShell: ApacheGroovyShell = new ApacheGroovyShell
 
-  lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup().asInstanceOf[JavaScriptEvaluator]
+  lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
   lazy val jsShell: JavaScriptShell = new JavaScriptShell
 
-  lazy val jythonEvaluator: JythonEvaluator = new JythonEvaluator().setup().asInstanceOf[JythonEvaluator]
+  lazy val jythonEvaluator: JythonEvaluator = new JythonEvaluator().setup()
   lazy val jythonShell: JythonShell = new JythonShell
 
   lazy val historyFile: Path = GlobalConfig.instance.cliHome.resolve("history.log")
