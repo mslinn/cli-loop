@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/mslinn/cli-loop.svg?branch=master)](https://travis-ci.org/mslinn/cli-loop)
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
-Supports JavaScript and Jython interpreters.
+Supports JavaScript and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
 
 ## Running the Program
 The `bin/run` Bash script assembles this project into path fat jar and runs it.
