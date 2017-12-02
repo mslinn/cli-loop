@@ -6,6 +6,7 @@
 [![GitHub version](https://badge.fury.io/gh/mslinn%2Fcli-loop.svg)](https://badge.fury.io/gh/mslinn%2Fcli-loop)
 
 Supports Groovy, JavaScript and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
+All scripts can share variables with Java and Scala code.
 
 Warning: Groovy's implementation of JSR223's `eval` method does not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings.
 `put` and `get` work, however.
