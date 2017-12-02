@@ -18,6 +18,7 @@ Groovy's JSR233 implementation suffers from this issue.
 I filed issue [GROOVY-8400](https://issues.apache.org/jira/browse/GROOVY-8400).
 
 JRuby's JSR223 implementation is worse than Groovy's.
+I added to the existing [bug report](https://github.com/jruby/jruby/issues/1952).
       
 ## Running the Program
 The `bin/run` Bash script assembles this project into path fat jar and runs it.
