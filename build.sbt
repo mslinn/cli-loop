@@ -35,10 +35,12 @@ javacOptions ++= Seq(
 )
 
 resolvers ++= Seq(
+  "micronautics/scala on bintray" at "http://dl.bintray.com/micronautics/scala"
 )
 
 libraryDependencies ++= Seq(
   "ch.qos.logback"      %  "logback-classic"   % "1.2.3",
+  "com.micronautics"    %% "web3j-scala"       % "0.2.0"    withSources(),
   "io.circe"            %% "circe-config"      % "0.3.0"    withSources(),
   "io.circe"            %% "circe-generic"     % "0.8.0"    withSources(),
   "org.codehaus.groovy" %  "groovy-all"        % "2.4.13"   withSources(),
