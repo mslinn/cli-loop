@@ -1,5 +1,11 @@
 package com.micronautics.evaluator
 
+import org.slf4j.{Logger, LoggerFactory}
+
+object Evaluator {
+  val log: Logger = LoggerFactory.getLogger(classOf[Evaluator[_]])
+}
+
 trait Evaluator[T] {
   var _linesInput: Int = 0
   var _lastErrorInputLine: Option[Int] = None

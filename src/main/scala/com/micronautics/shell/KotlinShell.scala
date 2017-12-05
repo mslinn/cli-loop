@@ -1,10 +1,10 @@
 package com.micronautics.shell
 
-import com.micronautics.cli.MainLoop.terminal
+/*import com.micronautics.cli.MainLoop.terminal
 import com.micronautics.cli.{CNodes, MainLoop, Shell}
 import com.micronautics.terminal.TerminalStyles.printRichInfo
 
-/*class KotlinShell extends Shell(
+class KotlinShell extends Shell(
   prompt = "kotlin",
   cNodes = CNodes.empty,
   evaluator = MainLoop.jrubyEvaluator

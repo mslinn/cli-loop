@@ -4,6 +4,7 @@ import javax.script.{Bindings, Invocable, ScriptContext, ScriptEngine, ScriptEng
 import com.micronautics.cli.MainLoop._
 import com.micronautics.terminal.TerminalStyles.{printRichError, richError}
 import scala.collection.JavaConverters._
+import Evaluator.log
 
 object JSR223Evaluator {
   val globalBindings: SimpleBindings = new SimpleBindings
@@ -16,7 +17,16 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
     if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
     else new ScriptEngineManager()
 
-  lazy val scriptEngine: ScriptEngine = new ScriptEngineManager().getEngineByName(engineName)
+  lazy val scriptEngine: ScriptEngine = {
+    log.debug(s"Summoning $engineName")
+    val result: ScriptEngine = scriptEngineManager.getEngineByName(engineName)
+    if (null == result) {
+      log.error(s"Error: ScriptEngine $engineName not found.")
+      System.exit(1)
+    }
+    result
+  }
+
   lazy val engineContext: ScriptContext = scriptEngine.getContext
   lazy val bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
 
@@ -27,14 +37,16 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
 
   /** Loads variables and methods from globalBindings */
   override def syncFromGlobalBindings(): Unit =
-    JSR223Evaluator.globalBindings.entrySet.asScala.foreach { entry =>
-      bindings.put(entry.getKey, entry.getValue)
+    Option(JSR223Evaluator.globalBindings.entrySet).foreach { _.asScala.foreach { entry =>
+        bindings.put(entry.getKey, entry.getValue)
+      }
     }
 
   /** Saves variables and methods to globalBindings */
   override def syncToGlobalBindings(): Unit =
-    bindings.entrySet.asScala.foreach { entry =>
-      JSR223Evaluator.globalBindings.put(entry.getKey, entry.getValue)
+    Option(bindings.entrySet).foreach { _.asScala.foreach { entry =>
+        JSR223Evaluator.globalBindings.put(entry.getKey, entry.getValue)
+      }
     }
 
   override def init(): EvaluatorInfo = {
