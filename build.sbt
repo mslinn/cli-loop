@@ -35,20 +35,27 @@ javacOptions ++= Seq(
 )
 
 resolvers ++= Seq(
+  "ImageJ Releases repository" at "http://maven.imagej.net/content/repositories/releases/"
 )
 
 libraryDependencies ++= Seq(
-  "ch.qos.logback"      %  "logback-classic"   % "1.2.3",
-  "io.circe"            %% "circe-config"      % "0.3.0"    withSources(),
-  "io.circe"            %% "circe-generic"     % "0.8.0"    withSources(),
-  "org.codehaus.groovy" %  "groovy-all"        % "2.4.13"   withSources(),
-  "org.jline"           %  "jline"             % "3.5.1"    withSources(),
-  "org.jruby"           %  "jruby-complete"    % "9.1.14.0" withSources(),
-  "org.eclipse.jgit"    %  "org.eclipse.jgit"  % "4.9.0.201710071750-r" withSources(),
-  "org.python"          %  "jython-shaded"     % "2.7.1"    withSources(),
+  "ch.qos.logback"       %  "logback-classic"       % "1.2.3",
+  "io.circe"             %% "circe-config"          % "0.3.0"    withSources(),
+  "io.circe"             %% "circe-generic"         % "0.8.0"    withSources(),
+  "org.codehaus.groovy"  %  "groovy-all"            % "2.4.13"   withSources(),
+  "org.jline"            %  "jline"                 % "3.5.1"    withSources(),
+//  "org.jetbrains.kotlin" %  "kotlin-stdlib"         % "1.2.0"    withSources(),
+//  "org.jetbrains.kotlin" %  "kotlin-script-util"    % "1.2.0"    withSources(),
+//  "org.jetbrains.kotlin" %  "kotlin-script-runtime" % "1.2.0"    withSources(),
+  "org.jruby"            %  "jruby-complete"        % "9.1.14.0" withSources(),
+  "org.eclipse.jgit"     %  "org.eclipse.jgit"      % "4.9.0.201710071750-r" withSources(),
+  "org.scijava"          %  "jython-shaded"         % "2.7.1"    withSources(),
+  "org.scijava"          %  "scripting-clojure"     % "0.1.6"    withSources(),
+  "org.scijava"          %  "scripting-java"        % "0.4.1"    withSources(),
+  "org.scijava"          %  "scripting-scala"       % "0.2.1"    withSources(),
   //
-  "org.scalatest"       %% "scalatest"         % "3.0.3"    % Test withSources(),
-  "junit"               %  "junit"             % "4.12"     % Test
+  "org.scalatest"        %% "scalatest"             % "3.0.3"    % Test withSources(),
+  "junit"                %  "junit"                 % "4.12"     % Test
 )
 
 fork in Test := true // https://stackoverflow.com/a/23575337/553865; forked tests prevents IDEA from attaching a debugger when launching tests via sbt tasks

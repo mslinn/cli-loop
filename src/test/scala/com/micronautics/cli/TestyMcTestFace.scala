@@ -1,7 +1,7 @@
 package com.micronautics.cli
 
 import javax.script.{Invocable, ScriptEngineFactory}
-import com.micronautics.evaluator.{GroovyEvaluator, JRubyEvaluator, JavaScriptEvaluator, JythonEvaluator}
+import com.micronautics.evaluator._
 import org.junit.runner.RunWith
 import org.python.core.{PyObject, PySystemState, PyType}
 import org.scalatest.Matchers._
@@ -10,6 +10,35 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class TestyMcTestFace extends WordSpec with MustMatchers {
+  "ClojureEvaluator" should {
+    "work" ignore {
+      val clojure = new ClojureEvaluator(useClassloader = false)
+
+      clojure.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = clojure.scriptEngineFactories
+      engineFactories.size should be > 0
+
+      clojure.showEngineFactories(engineFactories)
+      clojure.scriptEngine should not be null
+      clojure.scriptEngine.getFactory.getLanguageName shouldBe "Clojure"
+
+      clojure.isDefined("ten")   shouldBe false
+      clojure.put("ten", 10)     shouldBe 10.0
+      clojure.get("ten")         shouldBe 10.0
+      clojure.isDefined("ten")   shouldBe true
+
+      clojure.put("twenty", 20)  shouldBe 20.0
+      clojure.get("twenty")      shouldBe 20.0
+
+      clojure.eval("var twelve = ten + 2")
+      clojure.get("twelve")      shouldBe 12.0
+
+      clojure.eval("twelve")     shouldBe Some(12.0)
+      clojure.eval("twelve * 2") shouldBe Some(24)
+      clojure.get("twelve")      shouldBe 12
+    }
+  }
+
   "GroovyEvaluator" should {
     "work" in {
       val groovy = new GroovyEvaluator(useClassloader = false)
@@ -47,40 +76,66 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
     }
   }
 
-  "JythonEvaluator" should {
-    "work" in {
-      val jython = new JythonEvaluator(useClassloader = false)
+  "JavaEvaluator" should {
+    "work" ignore {
+      val java = new JavaEvaluator(useClassloader = false)
 
-      jython.scriptEngineOk shouldBe true
-      val engineFactories: List[ScriptEngineFactory] = jython.scriptEngineFactories
+      java.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = java.scriptEngineFactories
       engineFactories.size should be > 0
 
-      jython.showEngineFactories(engineFactories)
-      jython.scriptEngine should not be null
-      jython.scriptEngine.getFactory.getLanguageName shouldBe "python"
+      java.showEngineFactories(engineFactories)
+      java.scriptEngine should not be null
+      java.scriptEngine.getFactory.getLanguageName shouldBe "Java"
 
-      // not sure where this is going, but it looks potentially interesting
-      jython.eval("import sys")
-      jython.eval("sys").foreach { case sys: PySystemState =>
-        val modules: PyObject = sys.modules
-        val moduleType: PyType = modules.getType
-        val _: PyObject = moduleType.getDict
-      }
+      java.bindingsGlobal.containsKey("ten")
+      java.bindingsEngine.containsKey("ten")
+      java.isDefined("ten")   shouldBe false
+      java.put("ten", 10)     shouldBe 10.0
+      java.get("ten")         shouldBe 10.0
+      java.isDefined("ten")   shouldBe true
 
-      jython.isDefined("ten")   shouldBe false
-      jython.put("ten", 10)     shouldBe 10
-      jython.get("ten")         shouldBe 10
-      jython.isDefined("ten")   shouldBe true
+      java.put("twenty", 20)  shouldBe 20.0
+      java.get("twenty")      shouldBe 20.0
 
-      jython.put("twenty", 20)  shouldBe 20
-      jython.get("twenty")      shouldBe 20
+      java.eval("var twelve = ten + 2")
+      java.get("twelve")      shouldBe 12.0
 
-      jython.eval("twelve = ten + 2")
-      jython.get("twelve")      shouldBe 12
+      java.eval("twelve")     shouldBe Some(12.0)
+      java.eval("twelve * 2") shouldBe Some(24)
+      java.get("twelve")      shouldBe 12
+    }
+  }
 
-      jython.eval("twelve")     shouldBe Some(12)
-      jython.eval("twelve * 2") shouldBe Some(24)
-      jython.get("twelve")      shouldBe 12
+  "JavaScriptEvaluator" should {
+    "work" in {
+      val js = new JavaScriptEvaluator(useClassloader = false)
+
+      js.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = js.scriptEngineFactories
+      engineFactories.size should be > 0
+
+      js.showEngineFactories(engineFactories)
+      js.scriptEngine should not be null
+      js.scriptEngine.getFactory.getLanguageName shouldBe "ECMAScript"
+
+      js.isDefined("ten")   shouldBe false
+      js.put("ten", 10)     shouldBe 10.0
+      js.get("ten")         shouldBe 10.0
+      js.isDefined("ten")   shouldBe true
+
+      js.put("twenty", 20)  shouldBe 20.0
+      js.get("twenty")      shouldBe 20.0
+
+      js.eval("var twelve = ten + 2")
+      js.get("twelve")      shouldBe 12.0
+
+      js.eval("twelve")     shouldBe Some(12.0)
+      js.eval("twelve * 2") shouldBe Some(24)
+      js.get("twelve")      shouldBe 12
+
+      js.put("y", 99)       shouldBe 99
+      js.get("y")           shouldBe 99
     }
   }
 
@@ -122,35 +177,69 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
     }
   }
 
-  "JavaScriptEvaluator" should {
+  "JythonEvaluator" should {
     "work" in {
-      val js = new JavaScriptEvaluator(useClassloader = false)
+      val jython = new JythonEvaluator(useClassloader = false)
 
-      js.scriptEngineOk shouldBe true
-      val engineFactories: List[ScriptEngineFactory] = js.scriptEngineFactories
+      jython.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = jython.scriptEngineFactories
       engineFactories.size should be > 0
 
-      js.showEngineFactories(engineFactories)
-      js.scriptEngine should not be null
-      js.scriptEngine.getFactory.getLanguageName shouldBe "ECMAScript"
+      jython.showEngineFactories(engineFactories)
+      jython.scriptEngine should not be null
+      jython.scriptEngine.getFactory.getLanguageName shouldBe "python"
 
-      js.isDefined("ten")   shouldBe false
-      js.put("ten", 10)     shouldBe 10.0
-      js.get("ten")         shouldBe 10.0
-      js.isDefined("ten")   shouldBe true
+      // not sure where this is going, but it looks potentially interesting
+      jython.eval("import sys")
+      jython.eval("sys").foreach { case sys: PySystemState =>
+        val modules: PyObject = sys.modules
+        val moduleType: PyType = modules.getType
+        val _: PyObject = moduleType.getDict
+      }
 
-      js.put("twenty", 20)  shouldBe 20.0
-      js.get("twenty")      shouldBe 20.0
+      jython.isDefined("ten")   shouldBe false
+      jython.put("ten", 10)     shouldBe 10
+      jython.get("ten")         shouldBe 10
+      jython.isDefined("ten")   shouldBe true
 
-      js.eval("var twelve = ten + 2")
-      js.get("twelve")      shouldBe 12.0
+      jython.put("twenty", 20)  shouldBe 20
+      jython.get("twenty")      shouldBe 20
 
-      js.eval("twelve")     shouldBe Some(12.0)
-      js.eval("twelve * 2") shouldBe Some(24)
-      js.get("twelve")      shouldBe 12
+      jython.eval("twelve = ten + 2")
+      jython.get("twelve")      shouldBe 12
 
-      js.put("y", 99)       shouldBe 99
-      js.get("y")           shouldBe 99
+      jython.eval("twelve")     shouldBe Some(12)
+      jython.eval("twelve * 2") shouldBe Some(24)
+      jython.get("twelve")      shouldBe 12
+    }
+  }
+
+  "ScalaEvaluator" should {
+    "work" in {
+      val scala = new ScalaEvaluator(useClassloader = false)
+
+      scala.scriptEngineOk shouldBe true
+      val engineFactories: List[ScriptEngineFactory] = scala.scriptEngineFactories
+      engineFactories.size should be > 0
+
+      scala.showEngineFactories(engineFactories)
+      scala.scriptEngine should not be null
+      scala.scriptEngine.getFactory.getLanguageName shouldBe "Scala"
+
+      scala.isDefined("ten")   shouldBe false
+      scala.put("ten", 10)     shouldBe 10
+      scala.get("ten")         shouldBe 10
+      scala.isDefined("ten")   shouldBe true
+
+      scala.put("twenty", 20)  shouldBe 20
+      scala.get("twenty")      shouldBe 20
+
+//      scala.eval("var twelve = ten + 2")   // this implementation is also deficient
+//      scala.get("twelve")      shouldBe 12
+
+//      scala.eval("twelve")     shouldBe Some(12)
+//      scala.eval("twelve * 2") shouldBe Some(24)
+//      scala.get("twelve")      shouldBe 12
     }
   }
 }

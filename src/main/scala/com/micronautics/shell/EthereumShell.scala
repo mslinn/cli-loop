@@ -22,9 +22,15 @@ object EthereumShell {
 
   lazy val bindKeyCNode = CNode("bindkey", helpMessage="Show all key bindings")
 
+  lazy val clojureCNode = CNode("clojure", helpMessage="Enter ClojureEvaluator console")
+
   lazy val exitCNode = CNode("exit", helpMessage="Display this message", alias="^d") // todo automatically add this CNode
 
   lazy val groovyCNode = CNode("groovy", helpMessage="Enter GroovyEvaluator console")
+
+  lazy val kotlinCNode = CNode("kotlin", helpMessage="Enter KotlinEvaluator console")
+
+  lazy val javaCNode = CNode("java", helpMessage="Enter JavaEvaluator console")
 
   lazy val javaScriptCNode = CNode("javascript", helpMessage="Enter JavaScriptEvaluator console")
 
@@ -36,6 +42,8 @@ object EthereumShell {
   lazy val helpCNode = CNode("help", alias="?") // todo automatically add this CNode
 
   lazy val passwordCNode = CNode("password", helpMessage="Set the password")
+
+  lazy val scalaCNode = CNode("scala", helpMessage="Enter ScalaEvaluator console")
 
   lazy val setCNode = CNode(
     "set",
@@ -61,12 +69,16 @@ object EthereumShell {
     CNodes(
       accountCNode,
       bindKeyCNode,
+//      clojureCNode,
       exitCNode,
       groovyCNode,
+//      kotlinCNode,
+//      javaCNode,
       javaScriptCNode,
       jythonCNode,
       helpCNode,
       passwordCNode,
+      scalaCNode,
       setCNode,
       testKeyCNode,
       tPutCNode
@@ -91,9 +103,21 @@ class EthereumShell extends Shell(
 
       case bindKeyCNode.name => bindKey(parsedLine)
 
+      case clojureCNode.name =>
+        shellManager.shellStack.push(clojureShell)
+        printRichInfo(s"Entering the ${ clojureShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
+
       case groovyCNode.name =>
         shellManager.shellStack.push(groovyShell)
         printRichInfo(s"Entering the ${ groovyShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
+
+      case kotlinCNode.name =>
+//        shellManager.shellStack.push(kotlinShell)
+//        printRichInfo(s"Entering the ${ kotlinShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
+
+      case javaCNode.name =>
+        shellManager.shellStack.push(javaShell)
+        printRichInfo(s"Entering the ${ javaShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case javaScriptCNode.name =>
         shellManager.shellStack.push(jsShell)
@@ -108,6 +132,10 @@ class EthereumShell extends Shell(
         printRichInfo(s"Entering the ${ jythonShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case passwordCNode.name => password(parsedLine)
+
+      case scalaCNode.name =>
+        shellManager.shellStack.push(scalaShell)
+        printRichInfo(s"Entering the ${ scalaShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case setCNode.name => set(parsedLine)
 

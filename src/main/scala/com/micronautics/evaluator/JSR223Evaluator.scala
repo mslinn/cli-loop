@@ -162,5 +162,8 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
     super.shutdown()
   }
 
-  protected[evaluator] def bindingsEngine: Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
+  def bindingsEngine: Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
+
+  def bindingsGlobal: Bindings = engineContext.getBindings(ScriptContext.GLOBAL_SCOPE)
 }
+
