@@ -97,6 +97,7 @@ class EthereumShell extends Shell(
   val topHelpMessage = s"Micronautics Research Ethereum Shell v${ GlobalConfig.instance.version }"
 
   def input(line: String): Unit = {
+    val stack = shellManager.shellStack
     val parsedLine: ParsedLine = mainLoop.reader.getParser.parse(line, 0)
     parsedLine.word match {
       case accountCNode.name => account(parsedLine)
@@ -104,15 +105,18 @@ class EthereumShell extends Shell(
       case bindKeyCNode.name => bindKey(parsedLine)
 
       case clojureCNode.name =>
-        shellManager.shellStack.push(clojureShell)
+        clojureEvaluator.syncFromGlobalBindings()
+        stack.push(clojureShell)
         printRichInfo(s"Entering the ${ clojureShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case groovyCNode.name =>
-        shellManager.shellStack.push(groovyShell)
+        groovyEvaluator.syncFromGlobalBindings()
+        stack.push(groovyShell)
         printRichInfo(s"Entering the ${ groovyShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case kotlinCNode.name =>
-//        shellManager.shellStack.push(kotlinShell)
+//        kotlinEvaluator.syncFromGlobalBindings()
+//        stack.push(kotlinShell)
 //        printRichInfo(s"Entering the ${ kotlinShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case javaCNode.name =>
@@ -120,21 +124,25 @@ class EthereumShell extends Shell(
         printRichInfo(s"Entering the ${ javaShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case javaScriptCNode.name =>
-        shellManager.shellStack.push(jsShell)
+        javaEvaluator.syncFromGlobalBindings()
+        stack.push(jsShell)
         printRichInfo(s"Entering the ${ jsShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case jrubyCNode.name =>
-        shellManager.shellStack.push(jrubyShell)
+        jrubyEvaluator.syncFromGlobalBindings()
+        stack.push(jrubyShell)
         printRichInfo(s"Entering the ${ jrubyShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case jythonCNode.name =>
-        shellManager.shellStack.push(jythonShell)
+        jythonEvaluator.syncFromGlobalBindings()
+        stack.push(jythonShell)
         printRichInfo(s"Entering the ${ jythonShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case passwordCNode.name => password(parsedLine)
 
       case scalaCNode.name =>
-        shellManager.shellStack.push(scalaShell)
+        scalaEvaluator.syncFromGlobalBindings()
+        stack.push(scalaShell)
         printRichInfo(s"Entering the ${ scalaShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case setCNode.name => set(parsedLine)

@@ -1,11 +1,16 @@
 package com.micronautics.evaluator
 
-import javax.script.{Bindings, Invocable, ScriptContext, ScriptEngine, ScriptEngineFactory, ScriptEngineManager, ScriptException}
+import javax.script.{Bindings, Invocable, ScriptContext, ScriptEngine, ScriptEngineFactory, ScriptEngineManager, ScriptException, SimpleBindings}
 import com.micronautics.cli.MainLoop._
 import com.micronautics.terminal.TerminalStyles.{printRichError, richError}
 import scala.collection.JavaConverters._
 
-/** @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
+object JSR223Evaluator {
+  val globalBindings: SimpleBindings = new SimpleBindings
+}
+
+/** Syncs variables and methods defined in `globalBindings`
+  * @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
 abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = true) extends Evaluator[T] {
   protected lazy val scriptEngineManager: ScriptEngineManager =
     if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
@@ -19,6 +24,18 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
 
   lazy val invocable: Invocable = scriptEngine.asInstanceOf[Invocable]
 
+
+  /** Loads variables and methods from globalBindings */
+  override def syncFromGlobalBindings(): Unit =
+    JSR223Evaluator.globalBindings.entrySet.asScala.foreach { entry =>
+      bindings.put(entry.getKey, entry.getValue)
+    }
+
+  /** Saves variables and methods to globalBindings */
+  override def syncToGlobalBindings(): Unit =
+    bindings.entrySet.asScala.foreach { entry =>
+      JSR223Evaluator.globalBindings.put(entry.getKey, entry.getValue)
+    }
 
   override def init(): EvaluatorInfo = {
     _linesInput = 0
@@ -123,8 +140,10 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
     scriptEngineManager.getEngineFactories.asScala.exists(_.getNames.contains(engineName))
   }
 
+  /** Loads variables and methods from globalBindings */
   override def setup(): T = {
     try {
+      syncFromGlobalBindings()
       // todo reload context from path previous session
     } catch {
       case e: Exception =>
@@ -157,7 +176,9 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
            |""".stripMargin)
     }
 
+  /** Saves variables and methods to globalBindings */
   override def shutdown(): EvaluatorStatus = {
+    syncFromGlobalBindings()
     // todo save session context somehow
     super.shutdown()
   }

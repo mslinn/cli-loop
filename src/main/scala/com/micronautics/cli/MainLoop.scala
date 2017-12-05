@@ -136,7 +136,9 @@ class MainLoop(val shell: Shell[_]) extends MainLoopLike {
 
   protected def exitShell(): Unit = {
     import scala.language.existentials
-    val (nextShell, shellStack) = ShellManager.shellStack.pop()
+    val stack = ShellManager.shellStack
+    stack.top.evaluator.syncToGlobalBindings()
+    val (nextShell, shellStack) = stack.pop()
     if (shellStack.isEmpty) {
       exit()
     } else {

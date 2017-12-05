@@ -27,6 +27,11 @@ trait Evaluator[T] {
     lastErrorInputLine = _lastErrorInputLine,
     lastErrorMessage = _lastErrorMessage
   )
+  /** Does not do anything, designed to be overridden */
+  def syncFromGlobalBindings(): Unit = {}
+
+  /** Does not do anything, designed to be overridden */
+  def syncToGlobalBindings(): Unit = {}
 }
 
 case class EvaluatorInfo (
