@@ -9,6 +9,8 @@ Supports Groovy, JavaScript, JRuby and Jython interpreters via [JSR223](https://
 All scripts can share variables with Java and Scala code.
 Evaluators for Kotlin, Clojure, Java and Scala REPLs are pending upstream bug fixes.
 
+Variables defined in any shell are automatically propagated to all other shells.
+
 ## Not All JSR233 Implementations Are Useful
 Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
 which means that you do not see the results of computations in the REPL.
