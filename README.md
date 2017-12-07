@@ -41,7 +41,7 @@ cli-loop [master] jython> x
 ```
 
 ## Not All JSR233 Implementations Are Useful
-Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
+Some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
 which means that you do not see the results of computations in the REPL.
 This problem renders those implementations of JSR233 useless for most applications.
 
