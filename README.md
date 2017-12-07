@@ -10,6 +10,9 @@ All scripts can share variables with Java and Scala code.
 Evaluators for Kotlin, Clojure, Java and Scala REPLs are pending upstream bug fixes.
 
 Variables defined in any shell are automatically propagated to all other shells.
+Here we see a variable `x` defined with value 2 in a JavaScript shell (the value is actually 2.0, 
+since [JavaScript does not know about integers](https://stackoverflow.com/questions/33773296/is-there-or-isnt-there-an-integer-type-in-javascript),
+and that variable is picked up in a Jython shell.
 
 ```
 $ bin/run 
