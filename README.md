@@ -11,6 +11,35 @@ Evaluators for Kotlin, Clojure, Java and Scala REPLs are pending upstream bug fi
 
 Variables defined in any shell are automatically propagated to all other shells.
 
+```
+$ bin/run 
+Micronautics Research Ethereum Shell v0.2.4
+Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, scala, set, testkey and tput
+cli-loop [master] shell> javascript 
+Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
+
+cli-loop [master] javascript> var x = 2
+cli-loop [master] javascript> x
+2
+
+cli-loop [master] javascript> ^d
+Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, scala, set, testkey and tput
+cli-loop [master] shell> javascript 
+Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
+
+cli-loop [master] javascript> x
+2
+
+cli-loop [master] javascript> ^d
+
+Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, scala, set, testkey and tput
+cli-loop [master] shell> jython 
+Entering the jython sub-shell. Press Control-d to exit the sub-shell.
+
+cli-loop [master] jython> x
+2
+```
+
 ## Not All JSR233 Implementations Are Useful
 Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
 which means that you do not see the results of computations in the REPL.
