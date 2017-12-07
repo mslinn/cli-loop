@@ -54,6 +54,7 @@ JAR=target/scala-`SCALA_VERSION`/$NAME-assembly-$VERSION.jar
 while getopts ":hdSj" opt; do
   case ${opt} in
     d) DEBUG="-J-Xdebug -J-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"
+       export CLI_LOGGER=DEBUG
        RUN_SBT=true
        shift
        ;;
@@ -62,6 +63,7 @@ while getopts ":hdSj" opt; do
        shift
        ;;
     S) RUN_SBT=true
+       export CLI_LOGGER=DEBUG
        shift
        ;;
   esac

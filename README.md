@@ -7,8 +7,9 @@
 
 Supports Groovy, JavaScript, JRuby and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
 All scripts can share variables with Java and Scala code.
+Evaluators for Kotlin, Clojure, Java and Scala REPLs are pending upstream bug fixes.
 
-## Not all JSR233 Implementations are Useful
+## Not All JSR233 Implementations Are Useful
 Warning: some implementation of JSR223's `eval` method do not add new variables or functions to the `ScriptContext.ENGINE_SCOPE` bindings,
 which means that you do not see the results of computations in the REPL.
 This problem renders those implementations of JSR233 useless for most applications.
@@ -19,6 +20,11 @@ I filed issue [GROOVY-8400](https://issues.apache.org/jira/browse/GROOVY-8400).
 
 JRuby's JSR223 implementation is worse than Groovy's.
 I added to the existing [bug report](https://github.com/jruby/jruby/issues/1952).
+
+[Clojure](https://github.com/scijava/scripting-clojure/issues/7), 
+[Java](https://github.com/scijava/scripting-java/issues/11) and 
+[Scala](https://github.com/scijava/scripting-scala/issues/5) REPLs are pending upstream bug fixes before they can be used.
+The [Kotlin](https://github.com/scijava/scripting-kotlin/issues/1) JSR223 implementation requires shading.
       
 ## Running the Program
 The `bin/run` Bash script assembles this project into path fat jar and runs it.
