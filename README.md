@@ -14,7 +14,7 @@ Variables defined in any shell are automatically propagated to all other shells.
 ```
 $ bin/run 
 Micronautics Research Ethereum Shell v0.2.4
-Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, set, testkey and tput
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell> javascript 
 Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
 
@@ -23,7 +23,7 @@ cli-loop [master] javascript> x
 2
 
 cli-loop [master] javascript> ^d
-Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, set, testkey and tput
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell> javascript 
 Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
 
@@ -32,7 +32,7 @@ cli-loop [master] javascript> x
 
 cli-loop [master] javascript> ^d
 
-Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, set, testkey and tput
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell> jython 
 Entering the jython sub-shell. Press Control-d to exit the sub-shell.
 
@@ -88,7 +88,7 @@ The debug setup persists each time `rerun` relaunches the program.
 ```
 1. Waiting for source changes... (press enter to interrupt)
 Micronautics Research Ethereum Shell v0.2.3
-Commands are: account, bindkey, exit/^d, help/?, javascript, jython, password, set, testkey and tput
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell> javascript
 Entering the javascript subshell. Press Control-d to exit the subshell.
 
@@ -106,13 +106,13 @@ cli-loop [master] javascript> x
 cli-loop [master] javascript>
 Returning to ethereum.
 
-Commands are: account, bindkey, exit/^d, help/?, javascript, password, set, testkey and tput
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell>
 [success] Total time: 318 s, completed Nov 1, 2017 2:53:25 AM
 
 2. Waiting for source changes... (press enter to interrupt)
-Micronautics Research Ethereum Shell v0.1.0
-Commands are: account, bindkey, exit/^d, help/?, javascript, password, set, testkey and tput
+Micronautics Research Ethereum Shell v0.2.3
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell> javascript
 Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
 
@@ -131,7 +131,7 @@ cli-loop [master] javascript> Listening for transport dt_socket at address: 5005
 
 Returning to javascript.
 
-Commands are: account, bindkey, exit/^d, help/?, javascript, password, set, testkey and tput
+Commands are: exit/^d, groovy, help/?, javascript and jython
 cli-loop [master] shell>
 ^C
 mslinn@kaiju cli-loop (master)

@@ -67,21 +67,21 @@ object EthereumShell {
 
   lazy val cNodes: CNodes =
     CNodes(
-      accountCNode,
-      bindKeyCNode,
-//      clojureCNode,
+//      accountCNode, // just for testing
+//      bindKeyCNode, // just for testing
+//      clojureCNode, // awaiting upstream https://github.com/scijava/scripting-clojure/issues/7
       exitCNode,
       groovyCNode,
-//      kotlinCNode,
-//      javaCNode,
+//      kotlinCNode, // needs to be shaded https://github.com/scijava/scripting-kotlin/issues/1
+//      javaCNode,   // awaiting upstream https://github.com/scijava/scripting-java/issues/11
       javaScriptCNode,
       jythonCNode,
-      helpCNode,
-      passwordCNode,
-//      scalaCNode,
-      setCNode,
-      testKeyCNode,
-      tPutCNode
+      helpCNode
+//      passwordCNode, // just for testing
+//      scalaCNode,    // awaiting upstream https://github.com/scijava/scripting-scala/issues/5
+//      setCNode,      // just for testing
+//      testKeyCNode,  // just for testing
+//      tPutCNode      // just for testing
     )
 }
 
