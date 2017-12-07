@@ -5,6 +5,7 @@ import com.micronautics.cli.MainLoop._
 import com.micronautics.terminal.TerminalStyles.{printRichError, richError}
 import scala.collection.JavaConverters._
 import Evaluator.log
+import jdk.nashorn.api.scripting.ScriptObjectMirror
 
 object JSR223Evaluator {
   val globalBindings: SimpleBindings = new SimpleBindings
@@ -36,7 +37,18 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
   }.getScriptEngine
 
   lazy val engineContext: ScriptContext = scriptEngine.getContext
-  lazy val bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
+  def bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
+
+  def persistableBindings: List[(String, AnyRef)] = Option(bindings.asInstanceOf[ScriptObjectMirror].entrySet).map { simpleBindings =>
+    simpleBindings.asScala.map(entry => (entry.getKey, entry.getValue)).toList
+  }.getOrElse(Nil)
+
+  def fromPersistence(values: List[(String, AnyRef)]): List[(String, AnyRef)] = {
+    values.foreach { case (key, value) =>
+      bindings.put(key, value)
+    }
+    values
+  }
 
   lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
 

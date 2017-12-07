@@ -40,6 +40,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "ch.qos.logback"       %  "logback-classic"       % "1.2.3",
+  "com.twitter"          %% "chill"                 % "0.9.1",
   "io.circe"             %% "circe-config"          % "0.3.0"    withSources(),
   "io.circe"             %% "circe-generic"         % "0.8.0"    withSources(),
   "org.codehaus.groovy"  %  "groovy-all"            % "2.4.13"   withSources(),
