@@ -120,13 +120,14 @@ class EthereumShell extends Shell(
 //        printRichInfo(s"Entering the ${ kotlinShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case javaCNode.name =>
-        shellManager.shellStack.push(javaShell)
+        javaEvaluator.syncFromGlobalBindings()
+        stack.push(javaShell)
         printRichInfo(s"Entering the ${ javaShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case javaScriptCNode.name =>
-        javaEvaluator.syncFromGlobalBindings()
-        stack.push(jsShell)
-        printRichInfo(s"Entering the ${ jsShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
+        javaScriptEvaluator.syncFromGlobalBindings()
+        stack.push(javaScriptShell)
+        printRichInfo(s"Entering the ${ javaScriptShell.prompt } sub-shell. Press Control-d to exit the sub-shell.\n")
 
       case jrubyCNode.name =>
         jrubyEvaluator.syncFromGlobalBindings()

@@ -37,8 +37,8 @@ object MainLoop {
   lazy val javaEvaluator: JavaEvaluator = new JavaEvaluator().setup()
   lazy val javaShell: JavaShell = new JavaShell
 
-  lazy val jsEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
-  lazy val jsShell: JavaScriptShell = new JavaScriptShell
+  lazy val javaScriptEvaluator: JavaScriptEvaluator = new JavaScriptEvaluator().setup()
+  lazy val javaScriptShell: JavaScriptShell = new JavaScriptShell
 
   lazy val jrubyEvaluator: JRubyEvaluator = new JRubyEvaluator().setup()
   lazy val jrubyShell: JRubyShell = new JRubyShell
@@ -138,11 +138,12 @@ class MainLoop(val shell: Shell[_]) extends MainLoopLike {
     import scala.language.existentials
     val stack = ShellManager.shellStack
     stack.top.evaluator.syncToGlobalBindings()
-    val (nextShell, shellStack) = stack.pop()
+    val (previousShell, shellStack) = stack.pop()
+    Evaluator.log.debug(s"Exiting ${ stack.top.prompt } and returning to ${ previousShell.prompt }")
     if (shellStack.isEmpty) {
       exit()
     } else {
-      printRichInfo(s"Returning to ${ nextShell.prompt }.\n")
+      printRichInfo(s"Returning to ${ previousShell.prompt }.\n")
       help()
     }
   }
@@ -190,7 +191,8 @@ class MainLoop(val shell: Shell[_]) extends MainLoopLike {
     try {
       reader.readLine(prompt)
     } catch {
-      case _: NullPointerException => //  Error while finding completion candidates
+      case _: NullPointerException =>
+        Evaluator.log.debug("Error while finding completion candidates")
         ""
 
       case _: UserInterruptException =>

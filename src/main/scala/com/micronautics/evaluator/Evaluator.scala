@@ -3,7 +3,7 @@ package com.micronautics.evaluator
 import org.slf4j.{Logger, LoggerFactory}
 
 object Evaluator {
-  val log: Logger = LoggerFactory.getLogger(classOf[Evaluator[_]])
+  val log: Logger = LoggerFactory.getLogger(classOf[Evaluator[_]].getSimpleName)
 }
 
 trait Evaluator[T] {
