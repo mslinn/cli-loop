@@ -7,7 +7,7 @@ import com.micronautics.terminal.TerminalStyles.printRichInfo
 class ScalaShell extends Shell(
   prompt = "scala",
   cNodes = CNodes.empty,
-  evaluator = MainLoop.jrubyEvaluator
+  evaluator = MainLoop.scalaEvaluator
 ) {
   def input(line: String): Unit = evaluator.eval(line).foreach(x => printRichInfo(s"$x\n"))
 

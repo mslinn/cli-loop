@@ -78,7 +78,7 @@ object EthereumShell {
       jythonCNode,
       helpCNode,
       passwordCNode,
-      scalaCNode,
+//      scalaCNode,
       setCNode,
       testKeyCNode,
       tPutCNode

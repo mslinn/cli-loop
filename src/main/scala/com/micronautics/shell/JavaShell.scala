@@ -7,7 +7,7 @@ import com.micronautics.terminal.TerminalStyles.printRichInfo
 class JavaShell extends Shell(
   prompt = "java",
   cNodes = CNodes.empty,
-  evaluator = MainLoop.jrubyEvaluator
+  evaluator = MainLoop.javaEvaluator
 ) {
   def input(line: String): Unit = evaluator.eval(line).foreach(x => printRichInfo(s"$x\n"))
 

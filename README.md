@@ -14,7 +14,7 @@ Variables defined in any shell are automatically propagated to all other shells.
 ```
 $ bin/run 
 Micronautics Research Ethereum Shell v0.2.4
-Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, scala, set, testkey and tput
+Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, set, testkey and tput
 cli-loop [master] shell> javascript 
 Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
 
@@ -23,7 +23,7 @@ cli-loop [master] javascript> x
 2
 
 cli-loop [master] javascript> ^d
-Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, scala, set, testkey and tput
+Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, set, testkey and tput
 cli-loop [master] shell> javascript 
 Entering the javascript sub-shell. Press Control-d to exit the sub-shell.
 
@@ -32,7 +32,7 @@ cli-loop [master] javascript> x
 
 cli-loop [master] javascript> ^d
 
-Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, scala, set, testkey and tput
+Commands are: account, bindkey, exit/^d, groovy, help/?, javascript, jython, password, set, testkey and tput
 cli-loop [master] shell> jython 
 Entering the jython sub-shell. Press Control-d to exit the sub-shell.
 

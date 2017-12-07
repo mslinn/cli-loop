@@ -11,21 +11,29 @@ object JSR223Evaluator {
 }
 
 /** Syncs variables and methods defined in `globalBindings`
-  * @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] */
+  * @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] todo delete this parameter? */
 abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = true) extends Evaluator[T] {
-  protected lazy val scriptEngineManager: ScriptEngineManager =
-    if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
-    else new ScriptEngineManager()
-
-  lazy val scriptEngine: ScriptEngine = {
-    log.debug(s"Summoning $engineName")
-    val result: ScriptEngine = scriptEngineManager.getEngineByName(engineName)
-    if (null == result) {
-      log.error(s"Error: ScriptEngine $engineName not found.")
-      System.exit(1)
-    }
-    result
+  protected val scriptEngineManager: ScriptEngineManager = {
+    Option(new ScriptEngineManager())
+      .getOrElse {
+        Option(new ScriptEngineManager(getClass.getClassLoader))
+          .getOrElse(throw new Exception("ScriptEngineManger could not be loaded."))
+      }
+    /*if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
+    else new ScriptEngineManager()*/
   }
+
+  val scriptEngine: ScriptEngine = {
+    log.debug(s"Summoning $engineName")
+    scriptEngineManager.getEngineFactories.asScala.find(_.getNames.asScala.contains(engineName))
+      .getOrElse {
+        val factoryNames: String = scriptEngineManager.getEngineFactories.asScala.flatMap { factory =>
+          factory.getNames.asScala
+        }.sorted.mkString(", ")
+        log.error(s"Error: ScriptEngine $engineName not found. Available scriptEngines are: $factoryNames.")
+        sys.exit(1)
+      }
+  }.getScriptEngine
 
   lazy val engineContext: ScriptContext = scriptEngine.getContext
   lazy val bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
@@ -89,7 +97,7 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
 
       case e: Exception =>
         val cause: String = {
-          val x = e.getCause.getMessage
+          val x = if (null!=e.getCause) e.getCause.getMessage else ""
           if (x.nonEmpty) s"cause: $x, " else ""
         }
         val message: String = {
