@@ -1,6 +1,5 @@
 package com.micronautics.cli
 
-import java.io.File
 import javax.script.{Invocable, ScriptEngineFactory}
 import com.micronautics.evaluator._
 import org.junit.runner.RunWith
@@ -12,32 +11,23 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class TestyMcTestFace extends WordSpec with MustMatchers {
   "Persistence" should {
-    val file = File.createTempFile("pickle", ".def")
-    file.deleteOnExit()
     val js = new JavaScriptEvaluator(useClassloader = false)
-    val pickler = new Persistable(file)
 
     "work" in {
-      pickler.write(js.persistableBindings)
-      val actual: List[(String, AnyRef)]= js.fromPersistence(pickler.read[List[(String, AnyRef)]])
-      actual mustBe js.persistableBindings
+      js.save()
+      js.load mustBe js.persistableBindings
 
       js.bindings.put("int1", 1)
-      pickler.write(js.persistableBindings)
-      val actual2: List[(String, AnyRef)]  = js.fromPersistence(pickler.read[List[(String, AnyRef)]])
-      actual2 mustBe js.persistableBindings
+      js.save()
+      js.load mustBe js.persistableBindings
 
       js.bindings.put("string1", "hello")
-      pickler.write(js.persistableBindings)
-      val actual3: List[(String, AnyRef)]  = js.fromPersistence(pickler.read[List[(String, AnyRef)]])
-      actual3 mustBe js.persistableBindings
+      js.save()
+      js.load mustBe js.persistableBindings
 
       js.bindings.put("double1", 1.2)
-      pickler.write(js.persistableBindings)
-      val actual4: List[(String, AnyRef)]  = js.fromPersistence(pickler.read[List[(String, AnyRef)]])
-      actual4 mustBe js.persistableBindings
-
-      file.delete()
+      js.save()
+      js.load mustBe js.persistableBindings
     }
   }
 

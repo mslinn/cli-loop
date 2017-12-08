@@ -25,6 +25,14 @@ object GlobalConfig {
   }
 }
 
+/** @param cliHome defaults to ~/.cli-loop */
+case class GlobalConfig(
+  productName: String,
+  version: String,
+  cliHome: Path,
+  styles: Styles
+)
+
 object Style {
   val defaultStyle: AttributedStyle = AttributedStyle.DEFAULT
 }
@@ -56,11 +64,4 @@ case class Styles(
   help: Style,
   info: Style,
   javaScript: Style
-)
-
-case class GlobalConfig(
-  productName: String,
-  version: String,
-  cliHome: Path,
-  styles: Styles
 )

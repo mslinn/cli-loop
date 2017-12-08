@@ -5,6 +5,7 @@ import com.micronautics.cli.MainLoop._
 import com.micronautics.terminal.TerminalStyles.{printRichError, richError}
 import scala.collection.JavaConverters._
 import Evaluator.log
+import com.micronautics.cli.GlobalConfig
 import jdk.nashorn.api.scripting.ScriptObjectMirror
 
 object JSR223Evaluator {
@@ -14,6 +15,8 @@ object JSR223Evaluator {
 /** Syncs variables and methods defined in `globalBindings`
   * @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] todo delete this parameter? */
 abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = true) extends Evaluator[T] {
+  lazy val pickler = new Persistable(GlobalConfig.instance.cliHome)
+
   protected val scriptEngineManager: ScriptEngineManager = {
     Option(new ScriptEngineManager())
       .getOrElse {
@@ -43,11 +46,18 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
     simpleBindings.asScala.map(entry => (entry.getKey, entry.getValue)).toList
   }.getOrElse(Nil)
 
-  def fromPersistence(values: List[(String, AnyRef)]): List[(String, AnyRef)] = {
-    values.foreach { case (key, value) =>
+  def load: List[(String, AnyRef)] = {
+    val values = pickler.read[List[(String, AnyRef)]]
+    values foreach { case (key, value) =>
       bindings.put(key, value)
     }
     values
+  }
+
+  def save(): List[(String, AnyRef)] = {
+    val value = persistableBindings
+    pickler.write(value)
+    value
   }
 
   lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
