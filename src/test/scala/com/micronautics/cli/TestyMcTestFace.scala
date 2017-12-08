@@ -7,6 +7,7 @@ import org.python.core.{PyObject, PySystemState, PyType}
 import org.scalatest.Matchers._
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
+import JSR223Evaluator._
 
 @RunWith(classOf[JUnitRunner])
 class TestyMcTestFace extends WordSpec with MustMatchers {
@@ -14,20 +15,23 @@ class TestyMcTestFace extends WordSpec with MustMatchers {
     val js = new JavaScriptEvaluator(useClassloader = false)
 
     "work" in {
-      js.save()
-      js.load mustBe js.persistableBindings
+      js.bindings.save()
+      js.bindings.load mustBe js.bindings.asList
 
       js.bindings.put("int1", 1)
-      js.save()
-      js.load mustBe js.persistableBindings
+      js.bindings.save()
+      js.bindings.load mustBe js.bindings.asList
 
       js.bindings.put("string1", "hello")
-      js.save()
-      js.load mustBe js.persistableBindings
+      js.bindings.save()
+      js.bindings.load mustBe js.bindings.asList
 
       js.bindings.put("double1", 1.2)
-      js.save()
-      js.load mustBe js.persistableBindings
+      js.bindings.save()
+      js.bindings.load mustBe js.bindings.asList
+
+      js.clearBindings()
+      js.bindings.asList mustBe Nil
     }
   }
 

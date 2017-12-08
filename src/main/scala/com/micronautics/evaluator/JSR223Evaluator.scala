@@ -6,28 +6,49 @@ import com.micronautics.terminal.TerminalStyles.{printRichError, richError}
 import scala.collection.JavaConverters._
 import Evaluator.log
 import com.micronautics.cli.GlobalConfig
-import jdk.nashorn.api.scripting.ScriptObjectMirror
 
 object JSR223Evaluator {
-  val globalBindings: SimpleBindings = new SimpleBindings
-}
+  lazy val globalBindings: SimpleBindings = new SimpleBindings
 
-/** Syncs variables and methods defined in `globalBindings`
-  * @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] todo delete this parameter? */
-abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = true) extends Evaluator[T] {
   lazy val pickler = new Persistable(GlobalConfig.instance.cliHome)
 
-  protected val scriptEngineManager: ScriptEngineManager = {
+  protected val scriptEngineManager: ScriptEngineManager =
     Option(new ScriptEngineManager())
       .getOrElse {
         Option(new ScriptEngineManager(getClass.getClassLoader))
           .getOrElse(throw new Exception("ScriptEngineManger could not be loaded."))
       }
-    /*if (useClassloader) new ScriptEngineManager(getClass.getClassLoader)
-    else new ScriptEngineManager()*/
-  }
 
-  val scriptEngine: ScriptEngine = {
+  implicit class RichBindings(bindings: Bindings) {
+    /** @return List[(String, AnyRef)] of variable name/values */
+    def asList: List[(String, AnyRef)] = Option(bindings.entrySet).map { simpleBindings =>
+      simpleBindings.asScala.map(entry => (entry.getKey, entry.getValue)).toList
+    }.getOrElse(Nil)
+
+    /** Loads bindings from disk */
+    def load: List[(String, AnyRef)] = {
+      val values = pickler.read[List[(String, AnyRef)]]
+      values foreach { case (key, value) =>
+        bindings.put(key, value)
+      }
+      values
+    }
+
+    /** Writes bindings to disk */
+    def save(): List[(String, AnyRef)] = {
+      val value = bindings.asList
+      pickler.write(value)
+      value
+    }
+  }
+}
+
+/** Syncs variables and methods defined in `globalBindings`
+  * @param useClassloader set false for unit tests; see [[https://github.com/sbt/sbt/issues/1214]] todo delete this parameter? */
+abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = true) extends Evaluator[T] {
+  import JSR223Evaluator._
+
+  lazy val scriptEngine: ScriptEngine = {
     log.debug(s"Summoning $engineName")
     scriptEngineManager.getEngineFactories.asScala.find(_.getNames.asScala.contains(engineName))
       .getOrElse {
@@ -40,30 +61,19 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
   }.getScriptEngine
 
   lazy val engineContext: ScriptContext = scriptEngine.getContext
-  def bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
-
-  def persistableBindings: List[(String, AnyRef)] = Option(bindings.asInstanceOf[ScriptObjectMirror].entrySet).map { simpleBindings =>
-    simpleBindings.asScala.map(entry => (entry.getKey, entry.getValue)).toList
-  }.getOrElse(Nil)
-
-  def load: List[(String, AnyRef)] = {
-    val values = pickler.read[List[(String, AnyRef)]]
-    values foreach { case (key, value) =>
-      bindings.put(key, value)
-    }
-    values
-  }
-
-  def save(): List[(String, AnyRef)] = {
-    val value = persistableBindings
-    pickler.write(value)
-    value
-  }
 
   lazy val factory: ScriptEngineFactory = scriptEngine.getFactory
 
   lazy val invocable: Invocable = scriptEngine.asInstanceOf[Invocable]
 
+
+  def bindings: javax.script.Bindings = engineContext.getBindings(ScriptContext.ENGINE_SCOPE)
+
+  /** Deletes all user variables from memory; affects all evaluators because `globalBindings` is also cleared */
+  def clearBindings(): Unit = {
+    globalBindings.clear()
+    engineContext.setBindings(globalBindings, ScriptContext.ENGINE_SCOPE)
+  }
 
   /** Loads variables and methods from globalBindings */
   override def syncFromGlobalBindings(): Unit =

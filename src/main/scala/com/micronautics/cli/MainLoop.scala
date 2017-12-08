@@ -1,6 +1,7 @@
 package com.micronautics.cli
 
 import java.nio.file.Path
+import javax.script.Bindings
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
 import com.micronautics.evaluator._
@@ -130,7 +131,9 @@ class MainLoop(val shell: Shell[_]) extends MainLoopLike {
 
 
   protected def exit(): Unit = {
-    // todo clean up - one day close the console log
+    import JSR223Evaluator._
+    globalBindings.save()
+    // todo close the console log
     System.exit(0)
   }
 
