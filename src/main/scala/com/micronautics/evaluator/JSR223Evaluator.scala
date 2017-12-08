@@ -75,18 +75,16 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
     engineContext.setBindings(globalBindings, ScriptContext.ENGINE_SCOPE)
   }
 
-  /** Loads variables and methods from globalBindings */
+  /** Loads variables and methods into this evaluator from globalBindings */
   override def syncFromGlobalBindings(): Unit =
-    Option(JSR223Evaluator.globalBindings.entrySet).foreach { _.asScala.foreach { entry =>
-        bindings.put(entry.getKey, entry.getValue)
-      }
+    globalBindings.asList foreach { case (key, value) =>
+      bindings.put(key, value)
     }
 
-  /** Saves variables and methods to globalBindings */
+  /** Saves variables and methods from this evaluator to globalBindings */
   override def syncToGlobalBindings(): Unit =
-    Option(bindings.entrySet).foreach { _.asScala.foreach { entry =>
-        JSR223Evaluator.globalBindings.put(entry.getKey, entry.getValue)
-      }
+    bindings.asList foreach { case (key, value) =>
+      globalBindings.put(key, value)
     }
 
   override def init(): EvaluatorInfo = {
@@ -94,7 +92,10 @@ abstract class JSR223Evaluator[T](engineName: String, useClassloader: Boolean = 
     _lastErrorInputLine = None
     _lastErrorMessage = None
 
-    // todo reload previous session context somehow
+    bindings.load foreach { case (key, value) =>
+      bindings.put(key, value)
+    }
+    syncToGlobalBindings()
 
     info
   }
