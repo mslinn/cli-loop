@@ -1,30 +1,24 @@
-name := "cli-loop"
-organization := "com.micronautics"
-version := "0.2.4"
-scalaVersion := "2.12.4"
-licenses +=  ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
+cancelable := true
 
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding", "UTF-8",
-  "-feature",
-  "-target:jvm-1.8",
-  "-unchecked",
-  "-Ywarn-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused",
-  "-Ywarn-value-discard",
-  "-Xfuture",
-  "-Xlint"
+developers := List(
+  Developer("mslinn",
+            "Mike Slinn",
+            "mslinn@micronauticsresearch.com",
+            url("https://github.com/mslinn")
+  )
 )
 
-scalacOptions in (Compile, doc) ++= baseDirectory.map {
-  (bd: File) => Seq[String](
-     "-sourcepath", bd.getAbsolutePath,
-     "-doc-source-url", "https://github.com/mslinn/cli-loop/tree/master€{FILE_PATH}.scala"
-  )
-}.value
+fork in Test := true // https://stackoverflow.com/a/23575337/553865; forked tests prevents IDEA from attaching a debugger when launching tests via sbt tasks
+
+// define the statements initially evaluated when entering 'console', 'console-quick', but not 'console-project'
+initialCommands in console := """val js: com.micronautics.cli.JavaScriptEvaluator = new com.micronautics.cli.JavaScriptEvaluator()
+                                |js.eval("var x = 1")
+                                |js.show("x")
+                                |js.show("x = x + 1")
+                                |js.put("y", 99)
+                                |js.show("y")
+                                |val z = js.get("y")
+                                |""".stripMargin
 
 javacOptions ++= Seq(
   "-Xlint:deprecation",
@@ -32,10 +26,6 @@ javacOptions ++= Seq(
   "-source", "1.8",
   "-target", "1.8",
   "-g:vars"
-)
-
-resolvers ++= Seq(
-  "ImageJ Releases repository" at "http://maven.imagej.net/content/repositories/releases/"
 )
 
 libraryDependencies ++= Seq(
@@ -59,7 +49,7 @@ libraryDependencies ++= Seq(
   "junit"                %  "junit"                 % "4.12"     % Test
 )
 
-fork in Test := true // https://stackoverflow.com/a/23575337/553865; forked tests prevents IDEA from attaching a debugger when launching tests via sbt tasks
+licenses +=  ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
 logLevel := Level.Warn
 
@@ -70,14 +60,43 @@ logLevel in compile := Level.Warn
 // Level.INFO is needed to see detailed output when running tests
 logLevel in test := Level.Debug
 
-// define the statements initially evaluated when entering 'console', 'console-quick', but not 'console-project'
-initialCommands in console := """val js: com.micronautics.cli.JavaScriptEvaluator = new com.micronautics.cli.JavaScriptEvaluator()
-                                |js.eval("var x = 1")
-                                |js.show("x")
-                                |js.show("x = x + 1")
-                                |js.put("y", 99)
-                                |js.show("y")
-                                |val z = js.get("y")
-                                |""".stripMargin
+name := "cli-loop"
 
-cancelable := true
+organization := "com.micronautics"
+
+resolvers ++= Seq(
+  "ImageJ Releases repository" at "http://maven.imagej.net/content/repositories/releases/"
+)
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-target:jvm-1.8",
+  "-unchecked",
+  "-Ywarn-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-unused",
+  "-Ywarn-value-discard",
+  "-Xfuture",
+  "-Xlint"
+)
+
+scalacOptions in (Compile, doc) ++= baseDirectory.map {
+  (bd: File) => Seq[String](
+     "-sourcepath", bd.getAbsolutePath,
+     "-doc-source-url", "https://github.com/mslinn/cli-loop/tree/master€{FILE_PATH}.scala"
+  )
+}.value
+
+scalaVersion := "2.12.4"
+
+scmInfo := Some(
+  ScmInfo(
+    url(s"https://github.com/mslinn/$name"),
+    s"git@github.com:mslinn/$name.git"
+  )
+)
+
+version := "0.2.4"
