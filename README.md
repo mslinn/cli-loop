@@ -7,7 +7,7 @@
 
 Supports Groovy, JavaScript, JRuby and Jython interpreters via [JSR223](https://en.wikipedia.org/wiki/Scripting_for_the_Java_Platform).
 All scripts can share variables with Java and Scala code.
-Evaluators for Kotlin, Clojure, Java and Scala REPLs are pending upstream bug fixes.
+Evaluators for Kotlin, Clojure, Ruby, Java and Scala REPLs are pending upstream bug fixes.
 
 Variables defined in any shell are automatically propagated to all other shells.
 Here we see a variable `x` defined with value 2 in a JavaScript shell (the value is actually 2.0, 
@@ -51,9 +51,6 @@ This problem renders those implementations of JSR233 useless for most applicatio
 Groovy's JSR233 implementation suffers from this issue.
 `put` and `get` work, however.
 I filed issue [GROOVY-8400](https://issues.apache.org/jira/browse/GROOVY-8400).
-
-JRuby's JSR223 implementation is worse than Groovy's.
-I added to the existing [bug report](https://github.com/jruby/jruby/issues/1952).
 
 [Clojure](https://github.com/scijava/scripting-clojure/issues/7), 
 [Java](https://github.com/scijava/scripting-java/issues/11) and 

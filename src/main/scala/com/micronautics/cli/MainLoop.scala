@@ -1,7 +1,6 @@
 package com.micronautics.cli
 
 import java.nio.file.Path
-import javax.script.Bindings
 import com.micronautics.terminal.TerminalStyles._
 import com.micronautics.shell._
 import com.micronautics.evaluator._
